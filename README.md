@@ -93,18 +93,6 @@ python -m flask --app run reset-db --with-seed
 python run.py
 ```
 
-Open `http://127.0.0.1:5000/`.
-
-## Seeded Demo Accounts
-
-After `init-db --with-seed`, `reset-db --with-seed`, or `seed-demo`:
-
-- `super_admin`: `admin@example.com / Admin123!`
-- `ops_admin`: `ops@example.com / Ops12345!`
-- `biz_admin`: `biz@example.com / Biz12345!`
-- `owner`: `owner@example.com / Owner123!`
-- `staff`: `staff@example.com / Staff123!`
-
 The demo dataset also creates:
 
 - 1 business with subscription info

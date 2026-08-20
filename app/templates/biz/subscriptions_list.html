@@ -1,0 +1,61 @@
+{% extends 'components/base.html' %}
+
+{% block title %}{{ t('nav.subscriptions') }}{% endblock %}
+
+{% block content %}
+  <div class="section-header">
+    <div>
+      <p class="metric-label mb-2">{{ t('nav.business_admin') }}</p>
+      <h1 class="h2 mb-1">{{ t('nav.subscriptions') }}</h1>
+      <p>Review business subscriptions, renewal states, and outstanding dues.</p>
+    </div>
+  </div>
+
+  <form class="card page-section-card mb-4">
+    <div class="card-body">
+      <div class="row g-3 align-items-end">
+        <div class="col-lg-5"><label class="form-label">{{ t('common.search') }}</label><input class="form-control" type="text" name="q" value="{{ search }}" placeholder="Search businesses"></div>
+        <div class="col-lg-4">
+          <label class="form-label">{{ t('common.status') }}</label>
+          <select class="form-select" name="status">
+            <option value="all" {% if status == 'all' %}selected{% endif %}>{{ t('common.all_statuses') }}</option>
+            {% for value in ['active', 'trial', 'pending_approval', 'expired', 'suspended'] %}
+              <option value="{{ value }}" {% if status == value %}selected{% endif %}>{{ t('status.' ~ value) }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="col-lg-3 d-flex gap-2">
+          <button class="btn btn-primary w-100" type="submit">{{ t('common.apply') }}</button>
+          <a class="btn btn-outline-secondary" href="{{ url_for('biz.subscriptions') }}">{{ t('common.reset') }}</a>
+        </div>
+      </div>
+    </div>
+  </form>
+
+  <div class="card page-section-card">
+    <div class="card-body">
+      <div class="table-responsive">
+        <table class="table align-middle">
+          <thead><tr><th>{{ t('common.business') }}</th><th>{{ t('common.plan') }}</th><th>{{ t('common.status') }}</th><th>{{ t('common.amount_due') }}</th><th>{{ t('common.end_date') }}</th><th>{{ t('common.actions') }}</th></tr></thead>
+          <tbody>
+            {% for row in rows %}
+              <tr>
+                <td>
+                  <strong>{{ row.business.business_name }}</strong>
+                  <div class="small text-body-secondary">{{ row.business.owner_name }}</div>
+                </td>
+                <td>{{ row.business.plan_name }}</td>
+                <td><span class="app-status-badge status-{{ row.effective_status }}">{{ t('status.' ~ row.effective_status) }}</span></td>
+                <td>{{ currency(row.business.amount_due) }}</td>
+                <td>{{ row.business.subscription_end.strftime('%Y-%m-%d') if row.business.subscription_end else 'Not set' }}</td>
+                <td><a href="{{ url_for('biz.subscription_detail', business_id=row.business.id) }}" class="btn btn-sm btn-outline-secondary">{{ t('common.view') }}</a></td>
+              </tr>
+            {% else %}
+              <tr><td colspan="6" class="empty-state">{{ t('common.no_data') }}</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+{% endblock %}

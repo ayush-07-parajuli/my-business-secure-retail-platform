@@ -1,0 +1,86 @@
+{% extends 'components/base.html' %}
+
+{% block title %}{{ t('nav.sales_report') }}{% endblock %}
+
+{% block content %}
+  <div class="section-header">
+    <div>
+      <p class="metric-label mb-2">{{ t('owner.reports_title') }}</p>
+      <h1 class="h2 mb-1">{{ t('nav.sales_report') }}</h1>
+      <p>Printable transaction summary with filtering and export support.</p>
+    </div>
+    <div class="d-flex gap-2 flex-wrap">
+      <a class="btn btn-outline-secondary" href="{{ url_for('owner.sales_report', period=report_data.period.period, start_date=request.args.get('start_date', ''), end_date=request.args.get('end_date', ''), payment_status=payment_status, format='csv') }}">{{ t('common.export_csv') }}</a>
+      <button class="btn btn-primary" type="button" onclick="window.print()">{{ t('common.print') }}</button>
+    </div>
+  </div>
+
+  <div class="card page-section-card mb-4">
+    <div class="card-body">
+      <form class="filter-toolbar row g-3 align-items-end">
+        <div class="col-md-3">
+          <label class="form-label">{{ t('common.period') }}</label>
+          <select class="form-select" name="period">
+            <option value="all" {% if report_data.period.period == 'all' %}selected{% endif %}>{{ t('dashboard.all_time') }}</option>
+            <option value="today" {% if report_data.period.period == 'today' %}selected{% endif %}>{{ t('dashboard.today') }}</option>
+            <option value="month" {% if report_data.period.period == 'month' %}selected{% endif %}>{{ t('dashboard.this_month') }}</option>
+            <option value="year" {% if report_data.period.period == 'year' %}selected{% endif %}>{{ t('dashboard.this_year') }}</option>
+          </select>
+        </div>
+        <div class="col-md-2">
+          <label class="form-label">{{ t('common.from') }}</label>
+          <input class="form-control" type="date" name="start_date" value="{{ request.args.get('start_date', '') }}">
+        </div>
+        <div class="col-md-2">
+          <label class="form-label">{{ t('common.to') }}</label>
+          <input class="form-control" type="date" name="end_date" value="{{ request.args.get('end_date', '') }}">
+        </div>
+        <div class="col-md-3">
+          <label class="form-label">{{ t('common.status') }}</label>
+          <select class="form-select" name="payment_status">
+            <option value="all" {% if payment_status == 'all' %}selected{% endif %}>{{ t('common.all_statuses') }}</option>
+            <option value="paid" {% if payment_status == 'paid' %}selected{% endif %}>{{ t('status.paid') }}</option>
+            <option value="partial" {% if payment_status == 'partial' %}selected{% endif %}>{{ t('status.partial') }}</option>
+            <option value="unpaid" {% if payment_status == 'unpaid' %}selected{% endif %}>{{ t('status.unpaid') }}</option>
+          </select>
+        </div>
+        <div class="col-md-2 d-flex gap-2">
+          <button class="btn btn-primary flex-fill" type="submit">{{ t('common.apply') }}</button>
+          <a class="btn btn-outline-secondary" href="{{ url_for('owner.sales_report') }}">{{ t('common.reset') }}</a>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="insight-grid mb-4">
+    <div class="insight-card"><strong>{{ report_data.summary.transactions }}</strong><span>{{ t('dashboard.total_transactions') }}</span></div>
+    <div class="insight-card"><strong>{{ currency(report_data.summary.revenue, current_user.business) }}</strong><span>{{ t('common.revenue') }}</span></div>
+    <div class="insight-card"><strong>{{ currency(report_data.summary.cash_collected, current_user.business) }}</strong><span>{{ t('dashboard.cash_collected') }}</span></div>
+    <div class="insight-card"><strong>{{ currency(report_data.summary.due, current_user.business) }}</strong><span>{{ t('common.credit_outstanding') }}</span></div>
+  </div>
+
+  <div class="card page-section-card">
+    <div class="card-body">
+      <div class="table-responsive">
+        <table class="table align-middle">
+          <thead><tr><th>{{ t('common.date') }}</th><th>{{ t('common.customer') }}</th><th>Mode</th><th>{{ t('common.status') }}</th><th>{{ t('common.revenue') }}</th><th>{{ t('dashboard.cash_collected') }}</th><th>{{ t('common.credit_outstanding') }}</th></tr></thead>
+          <tbody>
+            {% for sale in report_data.sales %}
+              <tr>
+                <td>{{ sale.sale_datetime.strftime('%Y-%m-%d %H:%M') }}</td>
+                <td>{{ sale.customer.name if sale.customer else 'Walk-in' }}</td>
+                <td>{{ sale.payment_mode|capitalize }}</td>
+                <td><span class="app-status-badge status-{{ sale.payment_status }}">{{ t('status.' ~ sale.payment_status) }}</span></td>
+                <td>{{ currency(sale.total_revenue, current_user.business) }}</td>
+                <td>{{ currency(sale.amount_paid, current_user.business) }}</td>
+                <td>{{ currency(sale.amount_due, current_user.business) }}</td>
+              </tr>
+            {% else %}
+              <tr><td colspan="7" class="empty-state">{{ t('common.no_data') }}</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+{% endblock %}

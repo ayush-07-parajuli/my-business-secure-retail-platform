@@ -1,0 +1,35 @@
+{% extends 'components/base.html' %}
+
+{% block title %}{{ t('nav.activity_logs') }}{% endblock %}
+
+{% block content %}
+  <div class="section-header">
+    <div>
+      <p class="metric-label mb-2">{{ t('nav.operational_admin') }}</p>
+      <h1 class="h2 mb-1">{{ t('nav.activity_logs') }}</h1>
+      <p>Review platform activity and audit trails.</p>
+    </div>
+  </div>
+
+  <div class="card page-section-card">
+    <div class="card-body">
+      <div class="table-responsive">
+        <table class="table align-middle">
+          <thead><tr><th>{{ t('common.date') }}</th><th>Action</th><th>{{ t('common.business') }}</th><th>{{ t('common.status') }}</th></tr></thead>
+          <tbody>
+            {% for log in logs %}
+              <tr>
+                <td>{{ log.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                <td>{{ log.description }}</td>
+                <td>{{ log.business.business_name if log.business else 'Platform' }}</td>
+                <td>{{ log.severity }}</td>
+              </tr>
+            {% else %}
+              <tr><td colspan="4" class="empty-state">{{ t('common.no_data') }}</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+{% endblock %}

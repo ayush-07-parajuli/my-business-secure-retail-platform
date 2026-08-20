@@ -1,0 +1,57 @@
+{% extends 'components/base.html' %}
+
+{% block title %}Categories{% endblock %}
+
+{% block content %}
+  <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3 mb-4">
+    <div>
+      <h1 class="h3 mb-1">Categories</h1>
+      <p class="text-body-secondary mb-0">Organize products within your business.</p>
+    </div>
+    <a href="{{ url_for('owner.category_new') }}" class="btn btn-primary">Add Category</a>
+  </div>
+
+  <div class="card border-0 shadow-sm page-section-card">
+    <div class="card-body">
+      <form class="row g-3 mb-3">
+        <div class="col-md-6 col-lg-4">
+          <input type="search" class="form-control" name="q" value="{{ search }}" placeholder="Search categories">
+        </div>
+        <div class="col-auto">
+          <button class="btn btn-outline-secondary" type="submit">Search</button>
+        </div>
+      </form>
+
+      <div class="table-responsive">
+        <table class="table align-middle">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Description</th>
+              <th>Status</th>
+              <th class="text-end">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for category in categories %}
+              <tr>
+                <td class="fw-semibold">{{ category.name }}</td>
+                <td class="text-body-secondary">{{ category.description or '—' }}</td>
+                <td>
+                  <span class="badge {{ 'text-bg-success' if category.is_active else 'text-bg-secondary' }}">
+                    {{ 'Active' if category.is_active else 'Inactive' }}
+                  </span>
+                </td>
+                <td class="text-end">
+                  <a href="{{ url_for('owner.category_edit', category_id=category.id) }}" class="btn btn-sm btn-outline-primary">Edit</a>
+                </td>
+              </tr>
+            {% else %}
+              <tr><td colspan="4" class="text-center text-body-secondary py-4">No categories found.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+{% endblock %}

@@ -1,0 +1,45 @@
+{% extends 'components/base.html' %}
+
+{% block title %}Credit Sale{% endblock %}
+
+{% block content %}
+  <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3 mb-4">
+    <div>
+      <h1 class="h3 mb-1">Credit Sale</h1>
+      <p class="text-body-secondary mb-0">{{ sale.customer.name if sale.customer else 'No customer' }} • {{ sale.sale_datetime.strftime('%Y-%m-%d %H:%M') }}</p>
+    </div>
+    {% if sale.amount_due > 0 and sale.customer %}
+      <a href="{{ url_for('owner.repayment_new', sale_id=sale.id) }}" class="btn btn-primary">Record Repayment</a>
+    {% endif %}
+  </div>
+
+  <div class="row g-4">
+    <div class="col-md-6 col-xl-3"><div class="card border-0 shadow-sm dashboard-card"><div class="card-body"><div class="metric-label mb-2">Revenue</div><div class="display-6">{{ sale.total_revenue }}</div></div></div></div>
+    <div class="col-md-6 col-xl-3"><div class="card border-0 shadow-sm dashboard-card"><div class="card-body"><div class="metric-label mb-2">Amount Paid</div><div class="display-6">{{ sale.amount_paid }}</div></div></div></div>
+    <div class="col-md-6 col-xl-3"><div class="card border-0 shadow-sm dashboard-card"><div class="card-body"><div class="metric-label mb-2">Amount Due</div><div class="display-6">{{ sale.amount_due }}</div></div></div></div>
+    <div class="col-md-6 col-xl-3"><div class="card border-0 shadow-sm dashboard-card"><div class="card-body"><div class="metric-label mb-2">Unrealized Profit</div><div class="display-6">{{ sale.total_unrealized_profit }}</div></div></div></div>
+  </div>
+
+  <div class="card border-0 shadow-sm page-section-card mt-4">
+    <div class="card-body">
+      <h2 class="h5 mb-3">Repayment History</h2>
+      <div class="table-responsive">
+        <table class="table align-middle">
+          <thead><tr><th>Date</th><th>Received By</th><th>Note</th><th class="text-end">Amount</th></tr></thead>
+          <tbody>
+            {% for repayment in sale.repayments %}
+              <tr>
+                <td>{{ repayment.payment_date.strftime('%Y-%m-%d') }}</td>
+                <td>{{ repayment.received_by.full_name if repayment.received_by else 'System' }}</td>
+                <td>{{ repayment.note or '—' }}</td>
+                <td class="text-end">{{ repayment.amount_paid }}</td>
+              </tr>
+            {% else %}
+              <tr><td colspan="4" class="text-center text-body-secondary py-4">No repayments recorded yet.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+{% endblock %}

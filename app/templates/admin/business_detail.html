@@ -1,0 +1,135 @@
+{% extends 'components/base.html' %}
+
+{% block title %}{{ detail_data.business.business_name }}{% endblock %}
+
+{% block content %}
+  {% set business = detail_data.business %}
+  {% set metrics = detail_data.metrics %}
+  <div class="section-header">
+    <div>
+      <p class="metric-label mb-2">{{ t('admin.business_detail_title') }}</p>
+      <h1 class="h2 mb-1">{{ business.business_name }}</h1>
+      <p>{{ business.owner_name }} • {{ business.business_type or 'General business' }} • {{ business.email or business.phone or 'No contact' }}</p>
+    </div>
+    <div class="d-flex gap-2 flex-wrap">
+      <span class="app-status-badge status-{{ business.status }}">{{ t('status.' ~ business.status) }}</span>
+      {% if business.status == 'suspended' %}
+        <form method="post" action="{{ url_for('admin.business_reactivate', business_id=business.id) }}">
+          {{ action_form.hidden_tag() }}
+          <button type="submit" class="btn btn-success">Reactivate</button>
+        </form>
+      {% else %}
+        <form method="post" action="{{ url_for('admin.business_suspend', business_id=business.id) }}">
+          {{ action_form.hidden_tag() }}
+          <button type="submit" class="btn btn-outline-danger">Suspend</button>
+        </form>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="insight-grid mb-4">
+    <div class="insight-card"><strong>{{ metrics.total_users }}</strong><span>{{ t('dashboard.total_users') }}</span></div>
+    <div class="insight-card"><strong>{{ detail_data.staff_count }}</strong><span>{{ t('dashboard.total_staff') }}</span></div>
+    <div class="insight-card"><strong>{{ metrics.total_customers }}</strong><span>{{ t('common.customers') }}</span></div>
+    <div class="insight-card"><strong>{{ metrics.total_products }}</strong><span>{{ t('dashboard.total_products') }}</span></div>
+    <div class="insight-card"><strong>{{ metrics.total_stock_batches }}</strong><span>Stock Batches</span></div>
+    <div class="insight-card"><strong>{{ metrics.sales_count }}</strong><span>{{ t('dashboard.total_sales') }}</span></div>
+    <div class="insight-card"><strong>{{ currency(metrics.revenue, business) }}</strong><span>{{ t('common.revenue') }}</span></div>
+    <div class="insight-card"><strong>{{ currency(metrics.gross_profit, business) }}</strong><span>{{ t('common.gross_profit') }}</span></div>
+    <div class="insight-card"><strong>{{ currency(metrics.realized_profit, business) }}</strong><span>{{ t('common.realized_profit') }}</span></div>
+    <div class="insight-card"><strong>{{ currency(metrics.unrealized_profit, business) }}</strong><span>{{ t('common.unrealized_profit') }}</span></div>
+    <div class="insight-card"><strong>{{ currency(metrics.credit_outstanding, business) }}</strong><span>{{ t('common.credit_outstanding') }}</span></div>
+    <div class="insight-card"><strong>{{ metrics.low_stock_count }}</strong><span>{{ t('dashboard.low_stock_issues') }}</span></div>
+    <div class="insight-card"><strong>{{ metrics.near_expiry_count }}</strong><span>{{ t('dashboard.near_expiry_count') }}</span></div>
+    <div class="insight-card"><strong>{{ metrics.expired_stock_count }}</strong><span>{{ t('dashboard.expired_stock_count') }}</span></div>
+  </div>
+
+  <div class="row g-4">
+    <div class="col-xl-5">
+      <div class="card page-section-card h-100">
+        <div class="card-body">
+          <h2 class="h5 mb-3">Business Profile</h2>
+          <dl class="row mb-0">
+            <dt class="col-sm-5">Owner</dt><dd class="col-sm-7">{{ business.owner_name }}</dd>
+            <dt class="col-sm-5">Email</dt><dd class="col-sm-7">{{ business.email or 'Not set' }}</dd>
+            <dt class="col-sm-5">Phone</dt><dd class="col-sm-7">{{ business.phone or 'Not set' }}</dd>
+            <dt class="col-sm-5">Language</dt><dd class="col-sm-7">{{ business.preferred_language|upper }}</dd>
+            <dt class="col-sm-5">Registered</dt><dd class="col-sm-7">{{ business.registration_date.strftime('%Y-%m-%d') }}</dd>
+            <dt class="col-sm-5">Last Login</dt><dd class="col-sm-7">{{ business.last_login_at.strftime('%Y-%m-%d %H:%M') if business.last_login_at else 'No activity yet' }}</dd>
+            <dt class="col-sm-5">Address</dt><dd class="col-sm-7">{{ business.address or 'Not set' }}</dd>
+          </dl>
+
+          <hr>
+          <h3 class="h6 mb-3">Owners</h3>
+          <div class="list-group list-group-flush">
+            {% for owner in detail_data.owners %}
+              <div class="list-group-item px-0">
+                <div class="fw-semibold">{{ owner.full_name }}</div>
+                <div class="small text-body-secondary">{{ owner.email }}</div>
+              </div>
+            {% else %}
+              <div class="empty-state">{{ t('common.no_data') }}</div>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-xl-7">
+      <div class="card page-section-card mb-4">
+        <div class="card-body">
+          <div class="section-header mb-3">
+            <div>
+              <h2 class="h5 mb-1">{{ t('common.recent_sales') }}</h2>
+              <p>Latest transactions from this business.</p>
+            </div>
+          </div>
+          <div class="table-responsive">
+            <table class="table align-middle">
+              <thead><tr><th>{{ t('common.date') }}</th><th>{{ t('common.customer') }}</th><th>{{ t('common.revenue') }}</th><th>{{ t('common.status') }}</th></tr></thead>
+              <tbody>
+                {% for sale in detail_data.recent_sales %}
+                  <tr>
+                    <td>{{ sale.sale_datetime.strftime('%Y-%m-%d %H:%M') }}</td>
+                    <td>{{ sale.customer.name if sale.customer else 'Walk-in' }}</td>
+                    <td>{{ currency(sale.total_revenue, business) }}</td>
+                    <td><span class="app-status-badge status-{{ sale.payment_status }}">{{ t('status.' ~ sale.payment_status) }}</span></td>
+                  </tr>
+                {% else %}
+                  <tr><td colspan="4" class="empty-state">{{ t('common.no_data') }}</td></tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div class="card page-section-card">
+        <div class="card-body">
+          <div class="section-header mb-3">
+            <div>
+              <h2 class="h5 mb-1">{{ t('common.recent_activity') }}</h2>
+              <p>Operational and security-related events for this tenant.</p>
+            </div>
+          </div>
+          <div class="table-responsive">
+            <table class="table align-middle">
+              <thead><tr><th>{{ t('common.date') }}</th><th>Action</th><th>Severity</th></tr></thead>
+              <tbody>
+                {% for log in detail_data.recent_logs %}
+                  <tr>
+                    <td>{{ log.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                    <td>{{ log.description }}</td>
+                    <td>{{ log.severity|capitalize }}</td>
+                  </tr>
+                {% else %}
+                  <tr><td colspan="3" class="empty-state">{{ t('common.no_data') }}</td></tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}

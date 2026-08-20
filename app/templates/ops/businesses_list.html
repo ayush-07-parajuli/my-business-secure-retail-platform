@@ -1,0 +1,89 @@
+{% extends 'components/base.html' %}
+
+{% block title %}{{ t('nav.businesses') }}{% endblock %}
+
+{% block content %}
+  <div class="section-header">
+    <div>
+      <p class="metric-label mb-2">{{ t('nav.operational_admin') }}</p>
+      <h1 class="h2 mb-1">{{ t('nav.businesses') }}</h1>
+      <p>Monitor tenant status, business profile data, and operational health.</p>
+    </div>
+  </div>
+
+  <form class="card page-section-card mb-4">
+    <div class="card-body">
+      <div class="row g-3 align-items-end">
+        <div class="col-lg-4">
+          <label class="form-label">{{ t('common.search') }}</label>
+          <input class="form-control" type="text" name="q" value="{{ search }}" placeholder="Search businesses">
+        </div>
+        <div class="col-lg-3">
+          <label class="form-label">{{ t('common.status') }}</label>
+          <select class="form-select" name="status">
+            <option value="all" {% if status == 'all' %}selected{% endif %}>{{ t('common.all_statuses') }}</option>
+            <option value="active" {% if status == 'active' %}selected{% endif %}>{{ t('status.active') }}</option>
+            <option value="suspended" {% if status == 'suspended' %}selected{% endif %}>{{ t('status.suspended') }}</option>
+            <option value="pending" {% if status == 'pending' %}selected{% endif %}>{{ t('status.pending') }}</option>
+          </select>
+        </div>
+        <div class="col-lg-3">
+          <label class="form-label">Business Type</label>
+          <select class="form-select" name="business_type">
+            <option value="all" {% if business_type == 'all' %}selected{% endif %}>{{ t('common.all_types') }}</option>
+            {% for type_name in business_types %}
+              <option value="{{ type_name }}" {% if business_type == type_name %}selected{% endif %}>{{ type_name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="col-lg-2 d-flex gap-2">
+          <button class="btn btn-primary w-100" type="submit">{{ t('common.apply') }}</button>
+          <a class="btn btn-outline-secondary" href="{{ url_for('ops.businesses') }}">{{ t('common.reset') }}</a>
+        </div>
+      </div>
+    </div>
+  </form>
+
+  <div class="card page-section-card">
+    <div class="card-body">
+      <div class="table-responsive">
+        <table class="table align-middle">
+          <thead>
+            <tr>
+              <th>{{ t('common.business') }}</th>
+              <th>{{ t('common.status') }}</th>
+              <th>{{ t('common.plan') }}</th>
+              <th>{{ t('common.role') }}</th>
+              <th>{{ t('dashboard.low_stock_issues') }}</th>
+              <th>{{ t('common.actions') }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for row in rows %}
+              <tr>
+                <td>
+                  <strong>{{ row.business.business_name }}</strong>
+                  <div class="small text-body-secondary">{{ row.business.email or row.business.phone }}</div>
+                </td>
+                <td>
+                  <span class="app-status-badge status-{{ row.business.status }}">{{ t('status.' ~ row.business.status) }}</span>
+                </td>
+                <td>
+                  {{ row.subscription_summary.plan_name }}
+                  <div class="small text-body-secondary">{{ t('status.' ~ row.subscription_summary.status) }}</div>
+                </td>
+                <td>{{ row.owner_count }} owners • {{ row.staff_count }} staff</td>
+                <td>{{ row.low_stock_count }}</td>
+                <td>
+                  <a href="{{ url_for('ops.business_detail', business_id=row.business.id) }}" class="btn btn-sm btn-outline-secondary">{{ t('common.view') }}</a>
+                </td>
+              </tr>
+            {% else %}
+              <tr><td colspan="6" class="empty-state">{{ t('common.no_data') }}</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+{% endblock %}

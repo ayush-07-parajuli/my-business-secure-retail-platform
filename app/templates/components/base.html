@@ -1,0 +1,208 @@
+<!doctype html>
+<html lang="{{ current_language }}">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}{{ t('app.name') }}{% endblock %}</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
+      crossorigin="anonymous"
+    >
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/app.css') }}">
+    {% block extra_head %}{% endblock %}
+  </head>
+  <body class="app-body">
+    {% if current_user.is_authenticated %}
+      <div class="app-shell">
+        <aside class="app-sidebar" id="appSidebar">
+          <div class="app-sidebar-header">
+            <a class="app-brand" href="{{ url_for('main.index') }}">
+              <span class="app-brand-mark">MT</span>
+              <span>
+                <strong>{{ t('app.name') }}</strong>
+                <small>
+                  {% if current_user.is_super_admin() %}
+                    {{ t('dashboard.super_admin_heading') }}
+                  {% else %}
+                    {{ current_user.business.business_name }}
+                  {% endif %}
+                </small>
+              </span>
+            </a>
+          </div>
+
+          <div class="app-sidebar-scroll">
+            {% for section in app_navigation %}
+              <section class="app-nav-section">
+                <p class="app-nav-caption">{{ t(section['title_key']) }}</p>
+                <div class="app-nav-stack">
+                  {% for item in section['items'] %}
+                    <a
+                      href="{{ url_for(item['endpoint']) }}"
+                      class="app-nav-link{% if item['active'] %} is-active{% endif %}"
+                    >
+                      {{ t(item['label_key']) }}
+                    </a>
+                  {% endfor %}
+                </div>
+              </section>
+            {% endfor %}
+          </div>
+        </aside>
+
+        <div class="app-shell-main">
+          <header class="app-topbar">
+            <div class="d-flex align-items-center gap-2">
+              <button class="btn btn-outline-secondary d-lg-none" type="button" data-sidebar-toggle>
+                <span class="navbar-toggler-icon app-sidebar-icon"></span>
+              </button>
+              <div>
+                <div class="app-kicker">
+                  {% if current_user.is_super_admin() %}
+                    {{ t('nav.admin_dashboard') }}
+                  {% elif current_user.is_ops_admin() %}
+                    {{ t('nav.operational_admin') }}
+                  {% elif current_user.is_biz_admin() %}
+                    {{ t('nav.business_admin') }}
+                  {% elif current_user.is_owner() %}
+                    {{ t('nav.owner_dashboard') }}
+                  {% else %}
+                    {{ t('nav.staff_dashboard') }}
+                  {% endif %}
+                </div>
+                <div class="app-topbar-title">
+                  {{ current_user.full_name }}
+                  {% if current_user.business %}
+                    <span>{{ current_user.business.business_name }}</span>
+                  {% endif %}
+                </div>
+              </div>
+            </div>
+
+            <div class="d-flex align-items-center gap-2 flex-wrap justify-content-end">
+              <div class="dropdown">
+                <button class="btn btn-sm btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown" type="button">
+                  {{ t('common.language') }}: {{ supported_languages[current_language] }}
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end">
+                  {% for language_code, language_label in supported_languages.items() %}
+                    <li>
+                      <a class="dropdown-item{% if current_language == language_code %} active{% endif %}" href="{{ url_for('auth.select_language', language_code=language_code) }}">
+                        {{ language_label }}
+                      </a>
+                    </li>
+                  {% endfor %}
+                </ul>
+              </div>
+
+              <span class="app-role-pill">
+                {% if current_user.is_super_admin() %}
+                  {{ t('role.super_admin') }}
+                {% elif current_user.is_ops_admin() %}
+                  {{ t('role.ops_admin') }}
+                {% elif current_user.is_biz_admin() %}
+                  {{ t('role.biz_admin') }}
+                {% elif current_user.is_owner() %}
+                  {{ t('role.owner') }}
+                {% else %}
+                  {{ t('role.staff') }}
+                {% endif %}
+              </span>
+
+              <a href="{{ url_for('auth.change_password') }}" class="btn btn-sm btn-outline-secondary">
+                {{ t('nav.change_password') }}
+              </a>
+
+              <form method="post" action="{{ url_for('auth.logout') }}" class="d-inline">
+                {{ logout_form.hidden_tag() }}
+                <button type="submit" class="btn btn-sm btn-dark">{{ t('nav.logout') }}</button>
+              </form>
+            </div>
+          </header>
+
+          <main class="app-page">
+    {% else %}
+      <div class="public-shell">
+        <nav class="navbar navbar-expand-lg navbar-dark public-navbar">
+          <div class="container px-3 px-lg-4">
+            <a class="navbar-brand fw-semibold" href="{{ url_for('main.index') }}">{{ t('app.name') }}</a>
+            <button
+              class="navbar-toggler"
+              type="button"
+              data-bs-toggle="collapse"
+              data-bs-target="#mainNav"
+              aria-controls="mainNav"
+              aria-expanded="false"
+              aria-label="Toggle navigation"
+            >
+              <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="mainNav">
+              <div class="ms-auto d-flex flex-column flex-lg-row align-items-lg-center gap-2">
+                <div class="dropdown">
+                  <button class="btn btn-sm btn-outline-light dropdown-toggle" data-bs-toggle="dropdown" type="button">
+                    {{ t('common.language') }}: {{ supported_languages[current_language] }}
+                  </button>
+                  <ul class="dropdown-menu dropdown-menu-end">
+                    {% for language_code, language_label in supported_languages.items() %}
+                      <li>
+                        <a class="dropdown-item{% if current_language == language_code %} active{% endif %}" href="{{ url_for('auth.select_language', language_code=language_code) }}">
+                          {{ language_label }}
+                        </a>
+                      </li>
+                    {% endfor %}
+                  </ul>
+                </div>
+                <a class="btn btn-sm btn-outline-light" href="{{ url_for('auth.login') }}">{{ t('nav.login') }}</a>
+                <a class="btn btn-sm btn-light" href="{{ url_for('auth.register') }}">{{ t('nav.register') }}</a>
+              </div>
+            </div>
+          </div>
+        </nav>
+
+        <main class="py-4 py-lg-5">
+          <div class="container px-3 px-lg-4">
+    {% endif %}
+            {% include 'components/alerts.html' %}
+            {% if subscription_notice and current_user.is_authenticated and current_user.business %}
+              <div class="alert alert-{{ subscription_notice.severity }} mb-4">
+                <div class="d-flex flex-column flex-lg-row justify-content-between gap-2 align-items-lg-center">
+                  <div>
+                    <strong>{{ t('nav.subscription') }}:</strong>
+                    {{ subscription_notice.status_message }}
+                    {% if subscription_notice.end_date %}
+                      <div class="small mt-1">
+                        {{ t('common.plan') }}: {{ subscription_notice.plan_name }} |
+                        {{ t('common.end_date') }}: {{ subscription_notice.end_date.strftime('%Y-%m-%d') }} |
+                        {{ t('common.amount_due') }}: {{ currency(subscription_notice.amount_due, current_user.business) }}
+                      </div>
+                    {% endif %}
+                  </div>
+                  {% if current_user.is_owner() %}
+                    <a href="{{ url_for('owner.subscription') }}" class="btn btn-sm btn-outline-dark">{{ t('nav.subscription') }}</a>
+                  {% endif %}
+                </div>
+              </div>
+            {% endif %}
+            {% block content %}{% endblock %}
+    {% if current_user.is_authenticated %}
+          </main>
+        </div>
+      </div>
+    {% else %}
+          </div>
+        </main>
+      </div>
+    {% endif %}
+
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+      crossorigin="anonymous"
+    ></script>
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+    {% block extra_scripts %}{% endblock %}
+  </body>
+</html>

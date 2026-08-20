@@ -1,0 +1,76 @@
+{% extends 'components/base.html' %}
+
+{% block title %}{{ t('owner.settings_title') }}{% endblock %}
+
+{% block content %}
+  <div class="section-header">
+    <div>
+      <p class="metric-label mb-2">{{ t('nav.settings') }}</p>
+      <h1 class="h2 mb-1">{{ t('owner.settings_title') }}</h1>
+      <p>Update the business profile and default operating preferences for your tenant.</p>
+    </div>
+  </div>
+
+  <div class="card form-card">
+    <div class="card-body p-4">
+      <form method="post" novalidate>
+        {{ form.hidden_tag() }}
+        <div class="row g-4">
+          <div class="col-lg-6">
+            <label class="form-label" for="{{ form.business_name.id }}">{{ form.business_name.label.text }}</label>
+            {{ form.business_name(class="form-control") }}
+            {% for error in form.business_name.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+          </div>
+          <div class="col-lg-6">
+            <label class="form-label" for="{{ form.owner_name.id }}">{{ form.owner_name.label.text }}</label>
+            {{ form.owner_name(class="form-control") }}
+            {% for error in form.owner_name.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+          </div>
+          <div class="col-lg-4">
+            <label class="form-label" for="{{ form.phone.id }}">{{ form.phone.label.text }}</label>
+            {{ form.phone(class="form-control") }}
+            {% for error in form.phone.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+          </div>
+          <div class="col-lg-4">
+            <label class="form-label" for="{{ form.email.id }}">{{ form.email.label.text }}</label>
+            {{ form.email(class="form-control") }}
+            {% for error in form.email.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+          </div>
+          <div class="col-lg-4">
+            <label class="form-label" for="{{ form.business_type.id }}">{{ form.business_type.label.text }}</label>
+            {{ form.business_type(class="form-control") }}
+            {% for error in form.business_type.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+          </div>
+          <div class="col-lg-6">
+            <label class="form-label" for="{{ form.address.id }}">{{ form.address.label.text }}</label>
+            {{ form.address(class="form-control", rows="3") }}
+            {% for error in form.address.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+          </div>
+          <div class="col-lg-3">
+            <label class="form-label" for="{{ form.preferred_language.id }}">{{ form.preferred_language.label.text }}</label>
+            {{ form.preferred_language(class="form-select") }}
+            {% for error in form.preferred_language.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+          </div>
+          <div class="col-lg-3">
+            <label class="form-label" for="{{ form.currency_symbol.id }}">{{ form.currency_symbol.label.text }}</label>
+            {{ form.currency_symbol(class="form-control") }}
+            {% for error in form.currency_symbol.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+          </div>
+          <div class="col-lg-4">
+            <label class="form-label" for="{{ form.near_expiry_threshold_days.id }}">{{ form.near_expiry_threshold_days.label.text }}</label>
+            {{ form.near_expiry_threshold_days(class="form-control") }}
+            {% for error in form.near_expiry_threshold_days.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+          </div>
+          <div class="col-lg-8">
+            <label class="form-label" for="{{ form.receipt_footer_note.id }}">{{ form.receipt_footer_note.label.text }}</label>
+            {{ form.receipt_footer_note(class="form-control", rows="3") }}
+            {% for error in form.receipt_footer_note.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+          </div>
+        </div>
+        <div class="d-flex justify-content-end mt-4">
+          {{ form.submit(class="btn btn-primary") }}
+        </div>
+      </form>
+    </div>
+  </div>
+{% endblock %}

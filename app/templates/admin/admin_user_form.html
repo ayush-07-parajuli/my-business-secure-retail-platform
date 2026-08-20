@@ -1,0 +1,67 @@
+{% extends 'components/base.html' %}
+
+{% block title %}Create Company Admin{% endblock %}
+
+{% block content %}
+  <div class="row justify-content-center">
+    <div class="col-xl-8">
+      <div class="card page-section-card">
+        <div class="card-body p-4 p-lg-5">
+          <div class="section-header mb-4">
+            <div>
+              <p class="metric-label mb-2">{{ t('nav.admin_dashboard') }}</p>
+              <h1 class="h3 mb-1">Create Company Admin</h1>
+              <p class="text-body-secondary mb-0">Create a new Operational Admin or Business Admin account for My Business.</p>
+            </div>
+            <a href="{{ url_for('admin.users') }}" class="btn btn-outline-secondary">{{ t('common.back') }}</a>
+          </div>
+
+          <form method="post" novalidate>
+            {{ form.hidden_tag() }}
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label class="form-label" for="{{ form.full_name.id }}">{{ form.full_name.label.text }}</label>
+                {{ form.full_name(class="form-control") }}
+                {% for error in form.full_name.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+              </div>
+              <div class="col-md-6">
+                <label class="form-label" for="{{ form.role.id }}">{{ form.role.label.text }}</label>
+                {{ form.role(class="form-select") }}
+                {% for error in form.role.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+              </div>
+              <div class="col-md-6">
+                <label class="form-label" for="{{ form.username.id }}">{{ form.username.label.text }}</label>
+                {{ form.username(class="form-control") }}
+                {% for error in form.username.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+              </div>
+              <div class="col-md-6">
+                <label class="form-label" for="{{ form.email.id }}">{{ form.email.label.text }}</label>
+                {{ form.email(class="form-control") }}
+                {% for error in form.email.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+              </div>
+              <div class="col-md-6">
+                <label class="form-label" for="{{ form.preferred_language.id }}">{{ form.preferred_language.label.text }}</label>
+                {{ form.preferred_language(class="form-select") }}
+                {% for error in form.preferred_language.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+              </div>
+              <div class="col-md-6"></div>
+              <div class="col-md-6">
+                <label class="form-label" for="{{ form.password.id }}">{{ form.password.label.text }}</label>
+                {{ form.password(class="form-control") }}
+                {% for error in form.password.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+              </div>
+              <div class="col-md-6">
+                <label class="form-label" for="{{ form.confirm_password.id }}">{{ form.confirm_password.label.text }}</label>
+                {{ form.confirm_password(class="form-control") }}
+                {% for error in form.confirm_password.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+              </div>
+            </div>
+            <div class="mt-4 d-flex justify-content-end">
+              {{ form.submit(class="btn btn-primary") }}
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}

@@ -1,0 +1,14 @@
+{% extends 'components/base.html' %}
+
+{% block title %}403 Forbidden{% endblock %}
+
+{% block content %}
+  <div class="card border-0 shadow-sm mx-auto text-center" style="max-width: 42rem;">
+    <div class="card-body p-5">
+      <span class="badge text-bg-warning mb-3">403</span>
+      <h1 class="h3 mb-3">Access denied</h1>
+      <p class="text-body-secondary mb-4">You do not have permission to view this page with your current account.</p>
+      <a href="{{ url_for('main.index') }}" class="btn btn-primary">{{ t('common.home') }}</a>
+    </div>
+  </div>
+{% endblock %}

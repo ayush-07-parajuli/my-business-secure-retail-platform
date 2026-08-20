@@ -1,0 +1,39 @@
+# Python cache
+__pycache__/
+*.py[cod]
+
+# Virtual environment
+venv/
+.venv/
+env/
+
+# Environment secrets
+.env
+
+# Local application data
+instance/
+
+# Local databases
+*.db
+*.sqlite
+*.sqlite3
+
+# Temporary files
+.pw-tmp/
+
+# Testing/cache
+.pytest_cache/
+.coverage
+
+# IDE
+.vscode/
+.idea/
+
+# Windows
+Thumbs.db
+
+# macOS
+.DS_Store
+
+# Local configuration
+config.py

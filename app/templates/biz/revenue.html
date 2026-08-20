@@ -1,0 +1,45 @@
+{% extends 'components/base.html' %}
+
+{% block title %}{{ t('nav.revenue') }}{% endblock %}
+
+{% block content %}
+  <div class="section-header">
+    <div>
+      <p class="metric-label mb-2">{{ t('nav.business_admin') }}</p>
+      <h1 class="h2 mb-1">{{ t('nav.revenue') }}</h1>
+      <p>View collected SaaS subscription revenue separately from tenant shop profits.</p>
+    </div>
+    <div class="d-flex gap-2 flex-wrap">
+      <a href="{{ url_for('biz.revenue', format='csv', period=report_data.period.period) }}" class="btn btn-outline-secondary">{{ t('common.export_csv') }}</a>
+    </div>
+  </div>
+
+  <div class="row g-4 mb-4">
+    <div class="col-md-4"><div class="insight-card h-100"><strong>{{ report_data.summary.payments_count }}</strong><span>Approved Payments</span></div></div>
+    <div class="col-md-4"><div class="insight-card h-100"><strong>{{ currency(report_data.summary.revenue) }}</strong><span>{{ t('nav.revenue') }}</span></div></div>
+    <div class="col-md-4"><div class="insight-card h-100"><strong>{{ currency(report_data.summary.outstanding_dues) }}</strong><span>{{ t('dashboard.total_outstanding_dues') }}</span></div></div>
+  </div>
+
+  <div class="card page-section-card">
+    <div class="card-body">
+      <div class="table-responsive">
+        <table class="table align-middle">
+          <thead><tr><th>{{ t('common.business') }}</th><th>{{ t('common.amount_paid') }}</th><th>{{ t('common.payment_method') }}</th><th>{{ t('common.date') }}</th><th>{{ t('common.months_covered') }}</th></tr></thead>
+          <tbody>
+            {% for payment in report_data.payments %}
+              <tr>
+                <td>{{ payment.business.business_name }}</td>
+                <td>{{ currency(payment.amount_paid) }}</td>
+                <td>{{ payment.payment_method }}</td>
+                <td>{{ payment.approved_at.strftime('%Y-%m-%d') if payment.approved_at else payment.submitted_at.strftime('%Y-%m-%d') }}</td>
+                <td>{{ payment.months_covered }}</td>
+              </tr>
+            {% else %}
+              <tr><td colspan="5" class="empty-state">{{ t('common.no_data') }}</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+{% endblock %}

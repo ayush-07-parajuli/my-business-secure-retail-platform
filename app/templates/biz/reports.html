@@ -1,0 +1,28 @@
+{% extends 'components/base.html' %}
+
+{% block title %}{{ t('nav.reports') }}{% endblock %}
+
+{% block content %}
+  <div class="section-header">
+    <div>
+      <p class="metric-label mb-2">{{ t('nav.business_admin') }}</p>
+      <h1 class="h2 mb-1">{{ t('nav.reports') }}</h1>
+      <p>Company-side reporting for subscriptions, collections, and dues.</p>
+    </div>
+  </div>
+
+  <div class="card page-section-card">
+    <div class="card-body">
+      <div class="row g-4">
+        <div class="col-md-4"><div class="insight-card h-100"><strong>{{ report_data.summary.payments_count }}</strong><span>Approved Payments</span></div></div>
+        <div class="col-md-4"><div class="insight-card h-100"><strong>{{ currency(report_data.summary.revenue) }}</strong><span>{{ t('nav.revenue') }}</span></div></div>
+        <div class="col-md-4"><div class="insight-card h-100"><strong>{{ currency(report_data.summary.outstanding_dues) }}</strong><span>{{ t('dashboard.total_outstanding_dues') }}</span></div></div>
+      </div>
+      <div class="mt-4 d-flex gap-2 flex-wrap">
+        <a href="{{ url_for('biz.revenue') }}" class="btn btn-primary">{{ t('nav.revenue') }}</a>
+        <a href="{{ url_for('biz.subscriptions') }}" class="btn btn-outline-secondary">{{ t('nav.subscriptions') }}</a>
+        <a href="{{ url_for('biz.payments') }}" class="btn btn-outline-secondary">{{ t('nav.payments') }}</a>
+      </div>
+    </div>
+  </div>
+{% endblock %}

@@ -1,0 +1,39 @@
+{% extends 'components/base.html' %}
+
+{% block title %}{{ t('nav.low_stock') }}{% endblock %}
+
+{% block content %}
+  <div class="section-header">
+    <div>
+      <p class="metric-label mb-2">{{ t('owner.reports_title') }}</p>
+      <h1 class="h2 mb-1">{{ t('nav.low_stock') }}</h1>
+      <p>Products at or below their minimum stock threshold.</p>
+    </div>
+    <div class="d-flex gap-2 flex-wrap">
+      <a class="btn btn-outline-secondary" href="{{ url_for('owner.report_low_stock', format='csv') }}">{{ t('common.export_csv') }}</a>
+      <button class="btn btn-primary" type="button" onclick="window.print()">{{ t('common.print') }}</button>
+    </div>
+  </div>
+
+  <div class="card page-section-card">
+    <div class="card-body">
+      <div class="table-responsive">
+        <table class="table align-middle">
+          <thead><tr><th>{{ t('nav.products') }}</th><th>{{ t('common.quantity') }}</th><th>{{ t('common.min_stock') }}</th><th>{{ t('common.actions') }}</th></tr></thead>
+          <tbody>
+            {% for row in rows %}
+              <tr>
+                <td>{{ row.product.name }}</td>
+                <td>{{ row.total_quantity }} {{ row.product.unit_type }}</td>
+                <td>{{ row.product.min_stock_level }}</td>
+                <td><a href="{{ url_for('owner.product_detail', product_id=row.product.id) }}" class="btn btn-sm btn-outline-primary">{{ t('common.view') }}</a></td>
+              </tr>
+            {% else %}
+              <tr><td colspan="4" class="empty-state">{{ t('common.no_data') }}</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+{% endblock %}

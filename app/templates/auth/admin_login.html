@@ -1,0 +1,52 @@
+{% extends 'components/base.html' %}
+
+{% block title %}{{ t('auth.admin_login_title') }}{% endblock %}
+
+{% block content %}
+  <div class="row justify-content-center">
+    <div class="col-lg-5">
+      <div class="card border-0 shadow-sm auth-card">
+        <div class="card-body p-4 p-md-5">
+          <span class="badge text-bg-warning mb-3">My Business Company Control</span>
+          <h1 class="h3 mb-2">{{ t('auth.admin_login_title') }}</h1>
+          <p class="text-body-secondary mb-4">Only Super Admin accounts can access the full My Business platform dashboard, operations area, and subscription controls.</p>
+          <form method="post" novalidate>
+            {{ form.hidden_tag() }}
+            <input type="hidden" name="next" value="{{ request.args.get('next', '') }}">
+
+            <div class="mb-3">
+              <label class="form-label" for="{{ form.identifier.id }}">{{ t('auth.identifier') }}</label>
+              {{ form.identifier(class="form-control form-control-lg", placeholder=t('auth.identifier')) }}
+              {% for error in form.identifier.errors %}
+                <div class="text-danger small mt-1">{{ error }}</div>
+              {% endfor %}
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label" for="{{ form.password.id }}">{{ t('auth.password') }}</label>
+              {{ form.password(class="form-control form-control-lg", placeholder=t('auth.password')) }}
+              {% for error in form.password.errors %}
+                <div class="text-danger small mt-1">{{ error }}</div>
+              {% endfor %}
+            </div>
+
+            <div class="form-check mb-4">
+              {{ form.remember_me(class="form-check-input") }}
+              <label class="form-check-label" for="{{ form.remember_me.id }}">{{ t('auth.remember_me') }}</label>
+            </div>
+
+            {{ form.submit(class="btn btn-warning btn-lg w-100") }}
+          </form>
+
+          <div class="text-center mt-4 pt-3 border-top small">
+            <div class="d-flex justify-content-center gap-3 flex-wrap">
+              <a href="{{ url_for('auth.login') }}" class="fw-semibold text-decoration-none">{{ t('common.back_to_login') }}</a>
+              <a href="{{ url_for('auth.ops_login') }}" class="fw-semibold text-decoration-none">{{ t('nav.ops_login') }}</a>
+              <a href="{{ url_for('auth.biz_login') }}" class="fw-semibold text-decoration-none">{{ t('nav.biz_login') }}</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}

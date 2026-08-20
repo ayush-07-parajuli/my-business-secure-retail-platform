@@ -1,0 +1,70 @@
+{% extends 'components/base.html' %}
+
+{% block title %}{{ t('nav.inventory_report') }}{% endblock %}
+
+{% block content %}
+  <div class="section-header">
+    <div>
+      <p class="metric-label mb-2">{{ t('owner.reports_title') }}</p>
+      <h1 class="h2 mb-1">{{ t('nav.inventory_report') }}</h1>
+      <p>Review stock levels, current value, and replenishment priorities.</p>
+    </div>
+    <div class="d-flex gap-2 flex-wrap">
+      <a class="btn btn-outline-secondary" href="{{ url_for('owner.inventory_report', q=search, format='csv') }}">{{ t('common.export_csv') }}</a>
+      <button class="btn btn-primary" type="button" onclick="window.print()">{{ t('common.print') }}</button>
+    </div>
+  </div>
+
+  <div class="card page-section-card mb-4">
+    <div class="card-body">
+      <form class="filter-toolbar row g-3 align-items-end">
+        <div class="col-md-9">
+          <label class="form-label">{{ t('common.search') }}</label>
+          <input class="form-control" type="search" name="q" value="{{ search }}" placeholder="{{ t('common.search') }}">
+        </div>
+        <div class="col-md-3 d-flex gap-2">
+          <button class="btn btn-primary flex-fill" type="submit">{{ t('common.apply') }}</button>
+          <a class="btn btn-outline-secondary" href="{{ url_for('owner.inventory_report') }}">{{ t('common.reset') }}</a>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="insight-grid mb-4">
+    <div class="insight-card"><strong>{{ report_data.summary.total_products }}</strong><span>{{ t('dashboard.total_products') }}</span></div>
+    <div class="insight-card"><strong>{{ report_data.summary.low_stock_count }}</strong><span>{{ t('dashboard.low_stock_issues') }}</span></div>
+    <div class="insight-card"><strong>{{ report_data.summary.near_expiry_count }}</strong><span>{{ t('dashboard.near_expiry_count') }}</span></div>
+    <div class="insight-card"><strong>{{ report_data.summary.expired_count }}</strong><span>{{ t('dashboard.expired_stock_count') }}</span></div>
+    <div class="insight-card"><strong>{{ currency(report_data.summary.stock_value, current_user.business) }}</strong><span>{{ t('common.stock_value') }}</span></div>
+  </div>
+
+  <div class="card page-section-card">
+    <div class="card-body">
+      <div class="table-responsive">
+        <table class="table align-middle">
+          <thead><tr><th>{{ t('nav.products') }}</th><th>Category</th><th>{{ t('common.quantity') }}</th><th>{{ t('common.min_stock') }}</th><th>{{ t('common.stock_value') }}</th><th>{{ t('common.status') }}</th></tr></thead>
+          <tbody>
+            {% for row in report_data.rows %}
+              <tr>
+                <td>{{ row.product.name }}</td>
+                <td>{{ row.product.category.name if row.product.category else 'Uncategorized' }}</td>
+                <td>{{ row.total_quantity }} {{ row.product.unit_type }}</td>
+                <td>{{ row.product.min_stock_level }}</td>
+                <td>{{ currency(row.stock_value, current_user.business) }}</td>
+                <td>
+                  {% if row.low_stock %}
+                    <span class="app-status-badge status-low-stock">{{ t('status.low_stock') }}</span>
+                  {% else %}
+                    <span class="app-status-badge status-healthy">{{ t('status.healthy') }}</span>
+                  {% endif %}
+                </td>
+              </tr>
+            {% else %}
+              <tr><td colspan="6" class="empty-state">{{ t('common.no_data') }}</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+{% endblock %}

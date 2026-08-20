@@ -1,0 +1,67 @@
+{% extends 'components/base.html' %}
+
+{% block title %}{{ t('nav.credit_report') }}{% endblock %}
+
+{% block content %}
+  <div class="section-header">
+    <div>
+      <p class="metric-label mb-2">{{ t('owner.reports_title') }}</p>
+      <h1 class="h2 mb-1">{{ t('nav.credit_report') }}</h1>
+      <p>Track customers and sales with unpaid or partially paid balances.</p>
+    </div>
+    <div class="d-flex gap-2 flex-wrap">
+      <a class="btn btn-outline-secondary" href="{{ url_for('owner.credit_report', customer_id=selected_customer_id, format='csv') }}">{{ t('common.export_csv') }}</a>
+      <button class="btn btn-primary" type="button" onclick="window.print()">{{ t('common.print') }}</button>
+    </div>
+  </div>
+
+  <div class="card page-section-card mb-4">
+    <div class="card-body">
+      <form class="filter-toolbar row g-3 align-items-end">
+        <div class="col-md-8">
+          <label class="form-label">{{ t('common.customer') }}</label>
+          <select class="form-select" name="customer_id">
+            <option value="">All customers</option>
+            {% for customer in customers %}
+              <option value="{{ customer.id }}" {% if selected_customer_id == customer.id %}selected{% endif %}>{{ customer.name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="col-md-4 d-flex gap-2">
+          <button class="btn btn-primary flex-fill" type="submit">{{ t('common.apply') }}</button>
+          <a class="btn btn-outline-secondary" href="{{ url_for('owner.credit_report') }}">{{ t('common.reset') }}</a>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="insight-grid mb-4">
+    <div class="insight-card"><strong>{{ report_data.summary.open_credit_sales }}</strong><span>Open credit sales</span></div>
+    <div class="insight-card"><strong>{{ report_data.summary.customers_with_dues }}</strong><span>Customers with dues</span></div>
+    <div class="insight-card"><strong>{{ currency(report_data.summary.outstanding_credit, current_user.business) }}</strong><span>{{ t('common.credit_outstanding') }}</span></div>
+  </div>
+
+  <div class="card page-section-card">
+    <div class="card-body">
+      <div class="table-responsive">
+        <table class="table align-middle">
+          <thead><tr><th>{{ t('common.date') }}</th><th>{{ t('common.customer') }}</th><th>{{ t('common.revenue') }}</th><th>Paid</th><th>{{ t('common.credit_outstanding') }}</th><th>{{ t('common.status') }}</th></tr></thead>
+          <tbody>
+            {% for sale in report_data.credit_sales %}
+              <tr>
+                <td>{{ sale.sale_datetime.strftime('%Y-%m-%d %H:%M') }}</td>
+                <td>{{ sale.customer.name if sale.customer else 'Walk-in' }}</td>
+                <td>{{ currency(sale.total_revenue, current_user.business) }}</td>
+                <td>{{ currency(sale.amount_paid, current_user.business) }}</td>
+                <td>{{ currency(sale.amount_due, current_user.business) }}</td>
+                <td><span class="app-status-badge status-{{ sale.payment_status }}">{{ t('status.' ~ sale.payment_status) }}</span></td>
+              </tr>
+            {% else %}
+              <tr><td colspan="6" class="empty-state">{{ t('common.no_data') }}</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+{% endblock %}

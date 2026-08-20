@@ -1,0 +1,37 @@
+{% extends 'components/base.html' %}
+
+{% block title %}{{ product.name }} Batches{% endblock %}
+
+{% block content %}
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <h1 class="h3 mb-1">{{ product.name }} Batches</h1>
+      <p class="text-body-secondary mb-0">Track FIFO inventory and expiry by batch.</p>
+    </div>
+    <a href="{{ url_for('owner.inventory_restock') }}" class="btn btn-primary">Add Batch</a>
+  </div>
+
+  <div class="card border-0 shadow-sm page-section-card">
+    <div class="card-body">
+      <div class="table-responsive">
+        <table class="table align-middle">
+          <thead><tr><th>Batch</th><th>Supplier</th><th>Remaining</th><th>Cost</th><th>Expiry</th><th></th></tr></thead>
+          <tbody>
+            {% for batch in batches %}
+              <tr>
+                <td>{{ batch.batch_code }}</td>
+                <td>{{ batch.supplier_name }}</td>
+                <td>{{ batch.quantity_remaining }}</td>
+                <td>{{ batch.cost_price }}</td>
+                <td>{{ batch.expiry_date.strftime('%Y-%m-%d') if batch.expiry_date else '—' }}</td>
+                <td class="text-end"><a href="{{ url_for('owner.batch_detail', batch_id=batch.id) }}" class="btn btn-sm btn-outline-primary">View</a></td>
+              </tr>
+            {% else %}
+              <tr><td colspan="6" class="text-center text-body-secondary py-4">No batches found.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+{% endblock %}

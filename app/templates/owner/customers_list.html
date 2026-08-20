@@ -1,0 +1,54 @@
+{% extends 'components/base.html' %}
+
+{% block title %}{{ t('nav.customers') }}{% endblock %}
+
+{% block content %}
+  <div class="section-header">
+    <div>
+      <p class="metric-label mb-2">{{ t('nav.customers') }}</p>
+      <h1 class="h2 mb-1">{{ t('nav.customers') }}</h1>
+      <p>Maintain customer profiles and track outstanding balances.</p>
+    </div>
+    <a href="{{ url_for('owner.customer_new') }}" class="btn btn-primary">{{ t('common.add') }} {{ t('nav.customers') }}</a>
+  </div>
+
+  <div class="card page-section-card">
+    <div class="card-body">
+      <form class="filter-toolbar row g-3 align-items-end mb-4">
+        <div class="col-md-9">
+          <label class="form-label">{{ t('common.search') }}</label>
+          <input type="search" class="form-control" name="q" value="{{ search }}" placeholder="{{ t('common.search') }}">
+        </div>
+        <div class="col-md-3 d-flex gap-2">
+          <button class="btn btn-primary flex-fill" type="submit">{{ t('common.apply') }}</button>
+          <a class="btn btn-outline-secondary" href="{{ url_for('owner.customers') }}">{{ t('common.reset') }}</a>
+        </div>
+      </form>
+
+      <div class="table-responsive">
+        <table class="table align-middle">
+          <thead><tr><th>{{ t('common.customer') }}</th><th>Phone</th><th>{{ t('common.status') }}</th><th>{{ t('common.outstanding_balance') }}</th><th class="text-end">{{ t('common.actions') }}</th></tr></thead>
+          <tbody>
+            {% for customer in customers %}
+              <tr>
+                <td class="fw-semibold">{{ customer.name }}</td>
+                <td>{{ customer.phone or '-' }}</td>
+                <td>
+                  {% if customer.is_active %}
+                    <span class="app-status-badge status-active">{{ t('status.active') }}</span>
+                  {% else %}
+                    <span class="app-status-badge status-inactive">{{ t('status.inactive') }}</span>
+                  {% endif %}
+                </td>
+                <td>{{ currency(customer.outstanding_balance, current_user.business) }}</td>
+                <td class="text-end"><a href="{{ url_for('owner.customer_detail', customer_id=customer.id) }}" class="btn btn-sm btn-outline-primary">{{ t('common.view') }}</a></td>
+              </tr>
+            {% else %}
+              <tr><td colspan="5" class="empty-state">{{ t('common.no_data') }}</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+{% endblock %}

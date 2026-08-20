@@ -1,0 +1,73 @@
+{% extends 'components/base.html' %}
+
+{% block title %}{{ page_title }}{% endblock %}
+
+{% block content %}
+  <div class="row justify-content-center">
+    <div class="col-xl-9">
+      <div class="card border-0 shadow-sm form-card">
+        <div class="card-body p-4 p-lg-5">
+          <h1 class="h3 mb-3">{{ page_title }}</h1>
+          <form method="post" novalidate>
+            {{ form.hidden_tag() }}
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label class="form-label" for="{{ form.category_id.id }}">Category</label>
+                {{ form.category_id(class="form-select") }}
+                {% for error in form.category_id.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+              </div>
+              <div class="col-md-6">
+                <label class="form-label" for="{{ form.name.id }}">Product name</label>
+                {{ form.name(class="form-control") }}
+                {% for error in form.name.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+              </div>
+              <div class="col-md-4">
+                <label class="form-label" for="{{ form.sku.id }}">SKU</label>
+                {{ form.sku(class="form-control") }}
+                {% for error in form.sku.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+              </div>
+              <div class="col-md-4">
+                <label class="form-label" for="{{ form.unit_type.id }}">Unit type</label>
+                {{ form.unit_type(class="form-select") }}
+                {% for error in form.unit_type.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+              </div>
+              <div class="col-md-4">
+                <label class="form-label" for="{{ form.shelf_life_days.id }}">Shelf life (days)</label>
+                {{ form.shelf_life_days(class="form-control") }}
+                {% for error in form.shelf_life_days.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+              </div>
+              <div class="col-md-6">
+                <label class="form-label" for="{{ form.default_selling_price.id }}">Default selling price</label>
+                {{ form.default_selling_price(class="form-control") }}
+                {% for error in form.default_selling_price.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+              </div>
+              <div class="col-md-6">
+                <label class="form-label" for="{{ form.min_stock_level.id }}">Minimum stock level</label>
+                {{ form.min_stock_level(class="form-control") }}
+                {% for error in form.min_stock_level.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+              </div>
+              <div class="col-12">
+                <label class="form-label" for="{{ form.image_path.id }}">Image path</label>
+                {{ form.image_path(class="form-control") }}
+                {% for error in form.image_path.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+              </div>
+              <div class="col-12">
+                <label class="form-label" for="{{ form.description.id }}">Description</label>
+                {{ form.description(class="form-control", rows="4") }}
+                {% for error in form.description.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+              </div>
+            </div>
+            <div class="form-check my-4">
+              {{ form.is_active(class="form-check-input") }}
+              <label class="form-check-label" for="{{ form.is_active.id }}">Active</label>
+            </div>
+            <div class="d-flex gap-2">
+              {{ form.submit(class="btn btn-primary") }}
+              <a href="{{ url_for('owner.products') }}" class="btn btn-outline-secondary">Cancel</a>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}

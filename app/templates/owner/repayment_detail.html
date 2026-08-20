@@ -1,0 +1,19 @@
+{% extends 'components/base.html' %}
+
+{% block title %}Repayment Detail{% endblock %}
+
+{% block content %}
+  <div class="card border-0 shadow-sm page-section-card mx-auto" style="max-width: 48rem;">
+    <div class="card-body p-4 p-lg-5">
+      <h1 class="h3 mb-4">Repayment Detail</h1>
+      <div class="row g-4">
+        <div class="col-md-6"><div class="metric-label mb-2">Customer</div><div>{{ repayment.customer.name }}</div></div>
+        <div class="col-md-6"><div class="metric-label mb-2">Sale</div><div><a href="{{ url_for('owner.sale_detail', sale_id=repayment.sale.id) }}" class="text-decoration-none">{{ repayment.sale.id[:8] if repayment.sale else 'N/A' }}</a></div></div>
+        <div class="col-md-6"><div class="metric-label mb-2">Payment Date</div><div>{{ repayment.payment_date.strftime('%Y-%m-%d') }}</div></div>
+        <div class="col-md-6"><div class="metric-label mb-2">Amount</div><div>{{ repayment.amount_paid }}</div></div>
+        <div class="col-md-6"><div class="metric-label mb-2">Received By</div><div>{{ repayment.received_by.full_name if repayment.received_by else 'System' }}</div></div>
+        <div class="col-12"><div class="metric-label mb-2">Note</div><div>{{ repayment.note or 'No note provided.' }}</div></div>
+      </div>
+    </div>
+  </div>
+{% endblock %}

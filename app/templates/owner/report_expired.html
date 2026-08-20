@@ -1,0 +1,40 @@
+{% extends 'components/base.html' %}
+
+{% block title %}{{ t('nav.expired_stock') }}{% endblock %}
+
+{% block content %}
+  <div class="section-header">
+    <div>
+      <p class="metric-label mb-2">{{ t('owner.reports_title') }}</p>
+      <h1 class="h2 mb-1">{{ t('nav.expired_stock') }}</h1>
+      <p>Expired batches that still carry remaining stock.</p>
+    </div>
+    <div class="d-flex gap-2 flex-wrap">
+      <a class="btn btn-outline-secondary" href="{{ url_for('owner.report_expired', format='csv') }}">{{ t('common.export_csv') }}</a>
+      <button class="btn btn-primary" type="button" onclick="window.print()">{{ t('common.print') }}</button>
+    </div>
+  </div>
+
+  <div class="card page-section-card">
+    <div class="card-body">
+      <div class="table-responsive">
+        <table class="table align-middle">
+          <thead><tr><th>Batch</th><th>{{ t('nav.products') }}</th><th>{{ t('common.quantity') }}</th><th>Expired On</th><th>{{ t('common.actions') }}</th></tr></thead>
+          <tbody>
+            {% for batch in batches %}
+              <tr>
+                <td>{{ batch.batch_code or batch.id }}</td>
+                <td>{{ batch.product.name }}</td>
+                <td>{{ batch.quantity_remaining }}</td>
+                <td>{{ batch.expiry_date.strftime('%Y-%m-%d') if batch.expiry_date else '-' }}</td>
+                <td><a href="{{ url_for('owner.batch_detail', batch_id=batch.id) }}" class="btn btn-sm btn-outline-primary">{{ t('common.view') }}</a></td>
+              </tr>
+            {% else %}
+              <tr><td colspan="5" class="empty-state">{{ t('common.no_data') }}</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+{% endblock %}

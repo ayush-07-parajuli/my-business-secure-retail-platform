@@ -1,0 +1,72 @@
+{% extends 'components/base.html' %}
+
+{% block title %}{{ page_title }}{% endblock %}
+
+{% block content %}
+  <div class="row justify-content-center">
+    <div class="col-xl-10">
+      <div class="card border-0 shadow-sm form-card">
+        <div class="card-body p-4 p-lg-5">
+          <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+              <h1 class="h3 mb-1">{{ page_title }}</h1>
+              <p class="text-body-secondary mb-0">Stock is deducted using FIFO across available non-expired batches.</p>
+            </div>
+            <span class="badge text-bg-light border">{{ panel_prefix|capitalize }}</span>
+          </div>
+
+          <form method="post" novalidate>
+            {{ form.hidden_tag() }}
+            <div class="row g-3 mb-4">
+              <div class="col-md-4"><label class="form-label">Customer</label>{{ form.customer_id(class="form-select") }}{% for error in form.customer_id.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}</div>
+              <div class="col-md-4"><label class="form-label">Sale Date/Time</label>{{ form.sale_datetime(class="form-control") }}{% for error in form.sale_datetime.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}</div>
+              <div class="col-md-4"><label class="form-label">Payment Mode</label>{{ form.payment_mode(class="form-select") }}{% for error in form.payment_mode.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}</div>
+              <div class="col-md-4"><label class="form-label">Amount Paid</label>{{ form.amount_paid(class="form-control", placeholder="0.00") }}{% for error in form.amount_paid.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}</div>
+              <div class="col-12"><label class="form-label">Notes</label>{{ form.notes(class="form-control", rows="3") }}{% for error in form.notes.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}</div>
+            </div>
+
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <h2 class="h5 mb-0">Sale Items</h2>
+              <button type="button" class="btn btn-outline-primary btn-sm" id="add-sale-line">Add Line</button>
+            </div>
+            <div id="sale-items-container" class="d-grid gap-3">
+              {% for item in form.items %}
+                <div class="sale-line-item" data-sale-line>
+                  <div class="row g-3 align-items-end">
+                    <div class="col-md-5">
+                      <label class="form-label" for="{{ item.product_id.id }}">Product</label>
+                      {{ item.product_id(class="form-select") }}
+                      {% for error in item.product_id.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+                    </div>
+                    <div class="col-md-3">
+                      <label class="form-label" for="{{ item.quantity.id }}">Quantity</label>
+                      {{ item.quantity(class="form-control", step="0.01") }}
+                      {% for error in item.quantity.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+                    </div>
+                    <div class="col-md-3">
+                      <label class="form-label" for="{{ item.actual_selling_price.id }}">Selling Price</label>
+                      {{ item.actual_selling_price(class="form-control", step="0.01") }}
+                      {% for error in item.actual_selling_price.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+                    </div>
+                    <div class="col-md-1">
+                      <button type="button" class="btn btn-outline-danger w-100 remove-sale-line">&times;</button>
+                    </div>
+                  </div>
+                </div>
+              {% endfor %}
+            </div>
+
+            <div class="d-flex gap-2 mt-4">
+              {{ form.submit(class="btn btn-primary") }}
+              <a href="{{ url_for(panel_prefix ~ '.sales') }}" class="btn btn-outline-secondary">Cancel</a>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}
+
+{% block extra_scripts %}
+  <script src="{{ url_for('static', filename='js/sales-form.js') }}"></script>
+{% endblock %}

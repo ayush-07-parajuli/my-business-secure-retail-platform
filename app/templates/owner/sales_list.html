@@ -1,0 +1,57 @@
+{% extends 'components/base.html' %}
+
+{% block title %}{{ t('nav.sales') }}{% endblock %}
+
+{% block content %}
+  {% set sale_new_endpoint = panel_prefix ~ '.sale_new' %}
+  {% set sale_detail_endpoint = panel_prefix ~ '.sale_detail' %}
+  <div class="section-header">
+    <div>
+      <p class="metric-label mb-2">{{ t('nav.sales') }}</p>
+      <h1 class="h2 mb-1">{{ t('nav.sales') }}</h1>
+      <p>Review transaction history and payment status across the tenant.</p>
+    </div>
+    <a href="{{ url_for(sale_new_endpoint) }}" class="btn btn-primary">{{ t('nav.new_sale') }}</a>
+  </div>
+
+  <div class="card page-section-card">
+    <div class="card-body">
+      <form class="filter-toolbar row g-3 align-items-end mb-4">
+        <div class="col-md-4">
+          <label class="form-label">{{ t('common.status') }}</label>
+          <select class="form-select" name="payment_status">
+            <option value="all" {% if payment_status == 'all' %}selected{% endif %}>{{ t('common.all_statuses') }}</option>
+            <option value="paid" {% if payment_status == 'paid' %}selected{% endif %}>{{ t('status.paid') }}</option>
+            <option value="partial" {% if payment_status == 'partial' %}selected{% endif %}>{{ t('status.partial') }}</option>
+            <option value="unpaid" {% if payment_status == 'unpaid' %}selected{% endif %}>{{ t('status.unpaid') }}</option>
+          </select>
+        </div>
+        <div class="col-md-8 d-flex gap-2">
+          <button class="btn btn-primary flex-fill" type="submit">{{ t('common.apply') }}</button>
+          <a class="btn btn-outline-secondary" href="{{ url_for(panel_prefix ~ '.sales') }}">{{ t('common.reset') }}</a>
+        </div>
+      </form>
+
+      <div class="table-responsive">
+        <table class="table align-middle">
+          <thead><tr><th>{{ t('common.date') }}</th><th>{{ t('common.customer') }}</th><th>Mode</th><th>{{ t('common.status') }}</th><th>{{ t('common.revenue') }}</th><th>{{ t('common.credit_outstanding') }}</th><th class="text-end">{{ t('common.actions') }}</th></tr></thead>
+          <tbody>
+            {% for sale in sales %}
+              <tr>
+                <td>{{ sale.sale_datetime.strftime('%Y-%m-%d %H:%M') }}</td>
+                <td>{{ sale.customer.name if sale.customer else 'Walk-in' }}</td>
+                <td>{{ sale.payment_mode|capitalize }}</td>
+                <td><span class="app-status-badge status-{{ sale.payment_status }}">{{ t('status.' ~ sale.payment_status) }}</span></td>
+                <td>{{ currency(sale.total_revenue, current_user.business) }}</td>
+                <td>{{ currency(sale.amount_due, current_user.business) }}</td>
+                <td class="text-end"><a href="{{ url_for(sale_detail_endpoint, sale_id=sale.id) }}" class="btn btn-sm btn-outline-primary">{{ t('common.view') }}</a></td>
+              </tr>
+            {% else %}
+              <tr><td colspan="7" class="empty-state">{{ t('common.no_data') }}</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+{% endblock %}

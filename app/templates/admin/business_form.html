@@ -1,0 +1,123 @@
+{% extends 'components/base.html' %}
+
+{% block title %}{{ t('admin.new_business_title') }}{% endblock %}
+
+{% block content %}
+  <div class="section-header">
+    <div>
+      <p class="metric-label mb-2">{{ t('nav.businesses') }}</p>
+      <h1 class="h2 mb-1">{{ t('admin.new_business_title') }}</h1>
+      <p>Onboard a business and generate its primary owner account.</p>
+    </div>
+    <a href="{{ url_for('admin.businesses') }}" class="btn btn-outline-secondary">{{ t('common.back') }}</a>
+  </div>
+
+  <div class="card form-card">
+    <div class="card-body p-4">
+      <form method="post" novalidate>
+        {{ form.hidden_tag() }}
+        <div class="row g-4">
+          <div class="col-lg-6">
+            <label class="form-label" for="{{ form.business_name.id }}">{{ form.business_name.label.text }}</label>
+            {{ form.business_name(class="form-control") }}
+            {% for error in form.business_name.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+          </div>
+          <div class="col-lg-6">
+            <label class="form-label" for="{{ form.owner_name.id }}">{{ form.owner_name.label.text }}</label>
+            {{ form.owner_name(class="form-control") }}
+            {% for error in form.owner_name.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+          </div>
+          <div class="col-lg-4">
+            <label class="form-label" for="{{ form.owner_email.id }}">{{ form.owner_email.label.text }}</label>
+            {{ form.owner_email(class="form-control") }}
+            {% for error in form.owner_email.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+          </div>
+          <div class="col-lg-4">
+            <label class="form-label" for="{{ form.owner_username.id }}">{{ form.owner_username.label.text }}</label>
+            {{ form.owner_username(class="form-control") }}
+            {% for error in form.owner_username.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+          </div>
+          <div class="col-lg-4">
+            <label class="form-label" for="{{ form.phone.id }}">{{ form.phone.label.text }}</label>
+            {{ form.phone(class="form-control") }}
+            {% for error in form.phone.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+          </div>
+          <div class="col-lg-6">
+            <label class="form-label" for="{{ form.owner_password.id }}">{{ form.owner_password.label.text }}</label>
+            {{ form.owner_password(class="form-control") }}
+            {% for error in form.owner_password.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+          </div>
+          <div class="col-lg-6">
+            <label class="form-label" for="{{ form.confirm_owner_password.id }}">{{ form.confirm_owner_password.label.text }}</label>
+            {{ form.confirm_owner_password(class="form-control") }}
+            {% for error in form.confirm_owner_password.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+          </div>
+          <div class="col-lg-6">
+            <label class="form-label" for="{{ form.business_email.id }}">{{ form.business_email.label.text }}</label>
+            {{ form.business_email(class="form-control") }}
+            {% for error in form.business_email.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+          </div>
+          <div class="col-lg-6">
+            <label class="form-label" for="{{ form.business_type.id }}">{{ form.business_type.label.text }}</label>
+            {{ form.business_type(class="form-control") }}
+            {% for error in form.business_type.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+          </div>
+          <div class="col-lg-4">
+            <label class="form-label" for="{{ form.preferred_language.id }}">{{ form.preferred_language.label.text }}</label>
+            {{ form.preferred_language(class="form-select") }}
+            {% for error in form.preferred_language.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+          </div>
+          <div class="col-lg-4">
+            <label class="form-label" for="{{ form.status.id }}">{{ form.status.label.text }}</label>
+            {{ form.status(class="form-select") }}
+            {% for error in form.status.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+          </div>
+          <div class="col-lg-4">
+            <label class="form-label" for="{{ form.plan_name.id }}">{{ form.plan_name.label.text }}</label>
+            {{ form.plan_name(class="form-control") }}
+            {% for error in form.plan_name.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+          </div>
+          <div class="col-lg-4">
+            <label class="form-label" for="{{ form.monthly_fee.id }}">{{ form.monthly_fee.label.text }}</label>
+            {{ form.monthly_fee(class="form-control") }}
+            {% for error in form.monthly_fee.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+          </div>
+          <div class="col-lg-4">
+            <label class="form-label" for="{{ form.subscription_status.id }}">{{ form.subscription_status.label.text }}</label>
+            {{ form.subscription_status(class="form-select") }}
+            {% for error in form.subscription_status.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+          </div>
+          <div class="col-lg-4">
+            <label class="form-label" for="{{ form.currency_symbol.id }}">{{ form.currency_symbol.label.text }}</label>
+            {{ form.currency_symbol(class="form-control") }}
+            {% for error in form.currency_symbol.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+          </div>
+          <div class="col-lg-4">
+            <label class="form-label" for="{{ form.preferred_currency.id }}">{{ form.preferred_currency.label.text }}</label>
+            {{ form.preferred_currency(class="form-control") }}
+            {% for error in form.preferred_currency.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+          </div>
+          <div class="col-lg-4">
+            <label class="form-label" for="{{ form.near_expiry_threshold_days.id }}">{{ form.near_expiry_threshold_days.label.text }}</label>
+            {{ form.near_expiry_threshold_days(class="form-control") }}
+            {% for error in form.near_expiry_threshold_days.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+          </div>
+          <div class="col-12">
+            <label class="form-label" for="{{ form.address.id }}">{{ form.address.label.text }}</label>
+            {{ form.address(class="form-control", rows="2") }}
+            {% for error in form.address.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+          </div>
+          <div class="col-12">
+            <label class="form-label" for="{{ form.receipt_footer_note.id }}">{{ form.receipt_footer_note.label.text }}</label>
+            {{ form.receipt_footer_note(class="form-control", rows="3") }}
+            {% for error in form.receipt_footer_note.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+          </div>
+        </div>
+        <div class="d-flex justify-content-end gap-2 mt-4">
+          <a href="{{ url_for('admin.businesses') }}" class="btn btn-outline-secondary">{{ t('common.back') }}</a>
+          {{ form.submit(class="btn btn-primary") }}
+        </div>
+      </form>
+    </div>
+  </div>
+{% endblock %}

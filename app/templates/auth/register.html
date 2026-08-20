@@ -1,0 +1,96 @@
+{% extends 'components/base.html' %}
+
+{% block title %}{{ t('auth.register_title') }}{% endblock %}
+
+{% block content %}
+  <div class="row justify-content-center">
+    <div class="col-xl-8 col-lg-10">
+      <div class="card border-0 shadow-sm auth-card">
+        <div class="card-body p-4 p-md-5">
+          <span class="badge text-bg-success mb-3">Join My Business</span>
+          <h1 class="h3 mb-2">{{ t('auth.register_title') }}</h1>
+          <p class="text-body-secondary mb-4">Create your business account, start with the Full Plan, and manage renewal from inside My Business.</p>
+
+          <form method="post" novalidate>
+            {{ form.hidden_tag() }}
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label class="form-label" for="{{ form.business_name.id }}">{{ t('auth.business_name') }}</label>
+                {{ form.business_name(class="form-control", placeholder=t('auth.business_name')) }}
+                {% for error in form.business_name.errors %}
+                  <div class="text-danger small mt-1">{{ error }}</div>
+                {% endfor %}
+              </div>
+              <div class="col-md-6">
+                <label class="form-label" for="{{ form.owner_full_name.id }}">{{ t('auth.owner_full_name') }}</label>
+                {{ form.owner_full_name(class="form-control", placeholder=t('auth.owner_full_name')) }}
+                {% for error in form.owner_full_name.errors %}
+                  <div class="text-danger small mt-1">{{ error }}</div>
+                {% endfor %}
+              </div>
+              <div class="col-md-6">
+                <label class="form-label" for="{{ form.email.id }}">Email</label>
+                {{ form.email(class="form-control", placeholder="owner@example.com") }}
+                {% for error in form.email.errors %}
+                  <div class="text-danger small mt-1">{{ error }}</div>
+                {% endfor %}
+              </div>
+              <div class="col-md-6">
+                <label class="form-label" for="{{ form.username.id }}">Username</label>
+                {{ form.username(class="form-control", placeholder="owner") }}
+                {% for error in form.username.errors %}
+                  <div class="text-danger small mt-1">{{ error }}</div>
+                {% endfor %}
+              </div>
+              <div class="col-md-6">
+                <label class="form-label" for="{{ form.phone.id }}">{{ t('auth.phone') }}</label>
+                {{ form.phone(class="form-control", placeholder="+977...") }}
+                {% for error in form.phone.errors %}
+                  <div class="text-danger small mt-1">{{ error }}</div>
+                {% endfor %}
+              </div>
+              <div class="col-md-6">
+                <label class="form-label" for="{{ form.business_type.id }}">{{ t('auth.business_type') }}</label>
+                {{ form.business_type(class="form-control", placeholder="Retail, pharmacy, grocery...") }}
+                {% for error in form.business_type.errors %}
+                  <div class="text-danger small mt-1">{{ error }}</div>
+                {% endfor %}
+              </div>
+              <div class="col-md-6">
+                <label class="form-label" for="{{ form.preferred_language.id }}">{{ t('auth.preferred_language') }}</label>
+                {{ form.preferred_language(class="form-select") }}
+                {% for error in form.preferred_language.errors %}
+                  <div class="text-danger small mt-1">{{ error }}</div>
+                {% endfor %}
+              </div>
+              <div class="col-md-6"></div>
+              <div class="col-md-6">
+                <label class="form-label" for="{{ form.password.id }}">{{ t('auth.password') }}</label>
+                {{ form.password(class="form-control", placeholder="Minimum 8 characters") }}
+                {% for error in form.password.errors %}
+                  <div class="text-danger small mt-1">{{ error }}</div>
+                {% endfor %}
+              </div>
+              <div class="col-md-6">
+                <label class="form-label" for="{{ form.confirm_password.id }}">{{ t('auth.confirm_password') }}</label>
+                {{ form.confirm_password(class="form-control", placeholder=t('auth.confirm_password')) }}
+                {% for error in form.confirm_password.errors %}
+                  <div class="text-danger small mt-1">{{ error }}</div>
+                {% endfor %}
+              </div>
+            </div>
+
+            <div class="mt-4 d-grid d-md-flex justify-content-md-end">
+              {{ form.submit(class="btn btn-success btn-lg px-4") }}
+            </div>
+          </form>
+
+          <div class="d-flex justify-content-between align-items-center mt-4 pt-3 border-top small">
+            <span class="text-body-secondary">{{ t('auth.have_account') }}</span>
+            <a href="{{ url_for('auth.login') }}" class="fw-semibold text-decoration-none">{{ t('nav.login') }}</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}

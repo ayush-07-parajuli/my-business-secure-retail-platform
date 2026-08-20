@@ -1,0 +1,86 @@
+{% extends 'components/base.html' %}
+
+{% block title %}{{ t('admin.platform_report_title') }}{% endblock %}
+
+{% block content %}
+  <div class="section-header">
+    <div>
+      <p class="metric-label mb-2">{{ t('nav.reports') }}</p>
+      <h1 class="h2 mb-1">{{ t('admin.platform_report_title') }}</h1>
+      <p>Generate a tenant business activity summary for platform monitoring and export.</p>
+    </div>
+    <div class="d-flex gap-2 flex-wrap">
+      <a class="btn btn-outline-secondary" href="{{ url_for('admin.platform_report', period=report_data.period.period, start_date=request.args.get('start_date', ''), end_date=request.args.get('end_date', ''), format='csv') }}">{{ t('common.export_csv') }}</a>
+      <button class="btn btn-primary" type="button" onclick="window.print()">{{ t('common.print') }}</button>
+    </div>
+  </div>
+
+  <div class="card page-section-card mb-4">
+    <div class="card-body">
+      <form class="filter-toolbar row g-3 align-items-end">
+        <div class="col-md-3">
+          <label class="form-label">{{ t('common.period') }}</label>
+          <select class="form-select" name="period">
+            <option value="all" {% if report_data.period.period == 'all' %}selected{% endif %}>{{ t('dashboard.all_time') }}</option>
+            <option value="month" {% if report_data.period.period == 'month' %}selected{% endif %}>{{ t('dashboard.this_month') }}</option>
+            <option value="year" {% if report_data.period.period == 'year' %}selected{% endif %}>{{ t('dashboard.this_year') }}</option>
+          </select>
+        </div>
+        <div class="col-md-3">
+          <label class="form-label">{{ t('common.from') }}</label>
+          <input class="form-control" type="date" name="start_date" value="{{ request.args.get('start_date', '') }}">
+        </div>
+        <div class="col-md-3">
+          <label class="form-label">{{ t('common.to') }}</label>
+          <input class="form-control" type="date" name="end_date" value="{{ request.args.get('end_date', '') }}">
+        </div>
+        <div class="col-md-3 d-flex gap-2">
+          <button class="btn btn-primary flex-fill" type="submit">{{ t('common.apply') }}</button>
+          <a class="btn btn-outline-secondary" href="{{ url_for('admin.platform_report') }}">{{ t('common.reset') }}</a>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="insight-grid mb-4">
+    <div class="insight-card"><strong>{{ report_data.summary.business_count }}</strong><span>{{ t('dashboard.total_businesses') }}</span></div>
+    <div class="insight-card"><strong>{{ currency(report_data.summary.revenue) }}</strong><span>{{ t('dashboard.tenant_revenue') }}</span></div>
+    <div class="insight-card"><strong>{{ currency(report_data.summary.gross_profit) }}</strong><span>{{ t('dashboard.tenant_gross_profit') }}</span></div>
+    <div class="insight-card"><strong>{{ currency(report_data.summary.credit_outstanding) }}</strong><span>{{ t('common.credit_outstanding') }}</span></div>
+  </div>
+
+  <div class="card page-section-card">
+    <div class="card-body">
+      <div class="table-responsive">
+        <table class="table align-middle">
+          <thead>
+            <tr>
+              <th>{{ t('common.business') }}</th>
+              <th>{{ t('common.status') }}</th>
+              <th>{{ t('dashboard.total_users') }}</th>
+              <th>{{ t('dashboard.total_sales') }}</th>
+              <th>{{ t('dashboard.tenant_revenue') }}</th>
+              <th>{{ t('dashboard.tenant_gross_profit') }}</th>
+              <th>{{ t('common.credit_outstanding') }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for row in report_data.rows %}
+              <tr>
+                <td>{{ row.business.business_name }}</td>
+                <td><span class="app-status-badge status-{{ row.business.status }}">{{ t('status.' ~ row.business.status) }}</span></td>
+                <td>{{ row.user_count }}</td>
+                <td>{{ row.sales_count }}</td>
+                <td>{{ currency(row.revenue, row.business) }}</td>
+                <td>{{ currency(row.gross_profit, row.business) }}</td>
+                <td>{{ currency(row.credit_outstanding, row.business) }}</td>
+              </tr>
+            {% else %}
+              <tr><td colspan="7" class="empty-state">{{ t('common.no_data') }}</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+{% endblock %}

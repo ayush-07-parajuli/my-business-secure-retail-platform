@@ -1,0 +1,88 @@
+{% extends 'components/base.html' %}
+
+{% block title %}{{ detail_data.business.business_name }}{% endblock %}
+
+{% block content %}
+  {% set metrics = detail_data.metrics %}
+  <div class="section-header">
+    <div>
+      <p class="metric-label mb-2">{{ t('nav.operational_admin') }}</p>
+      <h1 class="h2 mb-1">{{ detail_data.business.business_name }}</h1>
+      <p>{{ detail_data.business.owner_name }} • {{ detail_data.business.business_type or 'Business' }}</p>
+    </div>
+    <div class="d-flex gap-2">
+      {% if detail_data.business.status != 'suspended' %}
+        <form method="post" action="{{ url_for('ops.business_suspend', business_id=detail_data.business.id) }}">
+          {{ action_form.hidden_tag() }}
+          <button type="submit" class="btn btn-outline-danger">Suspend</button>
+        </form>
+      {% else %}
+        <form method="post" action="{{ url_for('ops.business_reactivate', business_id=detail_data.business.id) }}">
+          {{ action_form.hidden_tag() }}
+          <button type="submit" class="btn btn-outline-success">Reactivate</button>
+        </form>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="row g-4">
+    <div class="col-lg-8">
+      <div class="card page-section-card">
+        <div class="card-body">
+          <div class="row g-4">
+            <div class="col-md-6"><div class="insight-card h-100"><strong>{{ detail_data.business.email or 'Not set' }}</strong><span>Email</span></div></div>
+            <div class="col-md-6"><div class="insight-card h-100"><strong>{{ detail_data.business.phone or 'Not set' }}</strong><span>Phone</span></div></div>
+            <div class="col-md-6"><div class="insight-card h-100"><strong>{{ metrics.total_users }}</strong><span>{{ t('dashboard.total_users') }}</span></div></div>
+            <div class="col-md-6"><div class="insight-card h-100"><strong>{{ metrics.total_products }}</strong><span>{{ t('dashboard.total_products') }}</span></div></div>
+            <div class="col-md-6"><div class="insight-card h-100"><strong>{{ metrics.total_customers }}</strong><span>{{ t('common.customers') }}</span></div></div>
+            <div class="col-md-6"><div class="insight-card h-100"><strong>{{ metrics.total_sales }}</strong><span>{{ t('dashboard.total_sales') }}</span></div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card page-section-card mt-4">
+        <div class="card-body">
+          <h2 class="h5 mb-3">{{ t('common.recent_activity') }}</h2>
+          <div class="table-responsive">
+            <table class="table align-middle">
+              <thead><tr><th>{{ t('common.date') }}</th><th>Action</th></tr></thead>
+              <tbody>
+                {% for log in detail_data.recent_logs %}
+                  <tr><td>{{ log.created_at.strftime('%Y-%m-%d %H:%M') }}</td><td>{{ log.description }}</td></tr>
+                {% else %}
+                  <tr><td colspan="2" class="empty-state">{{ t('common.no_data') }}</td></tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-4">
+      <div class="card page-section-card">
+        <div class="card-body">
+          <h2 class="h5 mb-3">{{ t('nav.subscription') }}</h2>
+          <div class="small text-body-secondary mb-2">{{ detail_data.subscription_summary.plan_name }}</div>
+          <span class="app-status-badge status-{{ detail_data.subscription_summary.status }}">{{ t('status.' ~ detail_data.subscription_summary.status) }}</span>
+          <div class="mt-3 small">
+            <div>{{ t('common.start_date') }}: {{ detail_data.subscription_summary.start_date.strftime('%Y-%m-%d') if detail_data.subscription_summary.start_date else 'Not set' }}</div>
+            <div>{{ t('common.end_date') }}: {{ detail_data.subscription_summary.end_date.strftime('%Y-%m-%d') if detail_data.subscription_summary.end_date else 'Not set' }}</div>
+            <div>{{ t('common.amount_due') }}: {{ currency(detail_data.subscription_summary.amount_due, detail_data.business) }}</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card page-section-card mt-4">
+        <div class="card-body">
+          <h2 class="h5 mb-3">Operational Health</h2>
+          <div class="insight-grid">
+            <div class="insight-card"><strong>{{ metrics.low_stock_count }}</strong><span>{{ t('dashboard.low_stock_issues') }}</span></div>
+            <div class="insight-card"><strong>{{ metrics.near_expiry_count }}</strong><span>{{ t('dashboard.near_expiry_count') }}</span></div>
+            <div class="insight-card"><strong>{{ metrics.expired_stock_count }}</strong><span>{{ t('dashboard.expired_stock_count') }}</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}

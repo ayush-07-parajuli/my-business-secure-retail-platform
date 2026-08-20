@@ -1,0 +1,32 @@
+{% extends 'components/base.html' %}
+
+{% block title %}{{ page_title }}{% endblock %}
+
+{% block content %}
+  <div class="row justify-content-center">
+    <div class="col-xl-8">
+      <div class="card border-0 shadow-sm form-card">
+        <div class="card-body p-4 p-lg-5">
+          <h1 class="h3 mb-3">{{ page_title }}</h1>
+          <form method="post" novalidate>
+            {{ form.hidden_tag() }}
+            <div class="row g-3">
+              <div class="col-md-6"><label class="form-label">Customer Name</label>{{ form.name(class="form-control") }}{% for error in form.name.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}</div>
+              <div class="col-md-6"><label class="form-label">Phone</label>{{ form.phone(class="form-control") }}{% for error in form.phone.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}</div>
+              <div class="col-12"><label class="form-label">Address</label>{{ form.address(class="form-control", rows="3") }}{% for error in form.address.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}</div>
+              <div class="col-12"><label class="form-label">Notes</label>{{ form.notes(class="form-control", rows="4") }}{% for error in form.notes.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}</div>
+            </div>
+            <div class="form-check my-4">
+              {{ form.is_active(class="form-check-input") }}
+              <label class="form-check-label" for="{{ form.is_active.id }}">Active</label>
+            </div>
+            <div class="d-flex gap-2">
+              {{ form.submit(class="btn btn-primary") }}
+              <a href="{{ url_for('owner.customers') }}" class="btn btn-outline-secondary">Cancel</a>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}

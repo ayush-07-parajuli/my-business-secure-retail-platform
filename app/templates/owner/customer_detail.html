@@ -1,0 +1,70 @@
+{% extends 'components/base.html' %}
+
+{% block title %}{{ customer.name }}{% endblock %}
+
+{% block content %}
+  <div class="section-header">
+    <div>
+      <p class="metric-label mb-2">{{ t('common.customer') }}</p>
+      <h1 class="h2 mb-1">{{ customer.name }}</h1>
+      <p>{{ customer.phone or 'No phone number' }}</p>
+    </div>
+    <div class="d-flex gap-2 flex-wrap">
+      <a href="{{ url_for('owner.customer_detail', customer_id=customer.id, format='csv') }}" class="btn btn-outline-secondary">{{ t('common.export_csv') }}</a>
+      <a href="{{ url_for('owner.customer_edit', customer_id=customer.id) }}" class="btn btn-primary">{{ t('common.edit') }}</a>
+    </div>
+  </div>
+
+  <div class="insight-grid mb-4">
+    <div class="insight-card"><strong>{{ currency(customer.outstanding_balance, current_user.business) }}</strong><span>{{ t('common.outstanding_balance') }}</span></div>
+    <div class="insight-card"><strong>{{ credit_sales|length }}</strong><span>{{ t('nav.credits') }}</span></div>
+    <div class="insight-card"><strong>{{ repayments|length }}</strong><span>{{ t('nav.repayments') }}</span></div>
+    <div class="insight-card"><strong>{{ recent_sales|length }}</strong><span>{{ t('common.recent_sales') }}</span></div>
+  </div>
+
+  <div class="row g-4">
+    <div class="col-xl-7">
+      <div class="card page-section-card">
+        <div class="card-body">
+          <h2 class="h5 mb-3">{{ t('nav.credits') }}</h2>
+          <div class="table-responsive">
+            <table class="table align-middle">
+              <thead><tr><th>{{ t('common.date') }}</th><th>{{ t('common.status') }}</th><th class="text-end">{{ t('common.credit_outstanding') }}</th></tr></thead>
+              <tbody>
+                {% for sale in credit_sales %}
+                  <tr>
+                    <td><a href="{{ url_for('owner.sale_detail', sale_id=sale.id) }}" class="text-decoration-none">{{ sale.sale_datetime.strftime('%Y-%m-%d %H:%M') }}</a></td>
+                    <td><span class="app-status-badge status-{{ sale.payment_status }}">{{ t('status.' ~ sale.payment_status) }}</span></td>
+                    <td class="text-end">{{ currency(sale.amount_due, current_user.business) }}</td>
+                  </tr>
+                {% else %}
+                  <tr><td colspan="3" class="empty-state">{{ t('common.no_data') }}</td></tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-xl-5">
+      <div class="card page-section-card h-100">
+        <div class="card-body">
+          <h2 class="h5 mb-3">{{ t('nav.repayments') }}</h2>
+          <div class="list-group list-group-flush">
+            {% for repayment in repayments %}
+              <div class="list-group-item px-0">
+                <div class="d-flex justify-content-between">
+                  <span>{{ repayment.payment_date.strftime('%Y-%m-%d') }}</span>
+                  <strong>{{ currency(repayment.amount_paid, current_user.business) }}</strong>
+                </div>
+                <div class="small text-body-secondary">{{ repayment.note or 'Repayment recorded' }}</div>
+              </div>
+            {% else %}
+              <div class="empty-state">{{ t('common.no_data') }}</div>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}

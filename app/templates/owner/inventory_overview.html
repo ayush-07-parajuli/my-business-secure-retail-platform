@@ -1,0 +1,86 @@
+{% extends 'components/base.html' %}
+
+{% block title %}Inventory{% endblock %}
+
+{% block content %}
+  <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3 mb-4">
+    <div>
+      <h1 class="h3 mb-1">Inventory</h1>
+      <p class="text-body-secondary mb-0">Monitor stock levels, remaining value, and recent batches.</p>
+    </div>
+    <div class="d-flex gap-2 flex-wrap">
+      <a href="{{ url_for('owner.inventory_restock') }}" class="btn btn-primary">Add Stock Batch</a>
+      <a href="{{ url_for('owner.report_low_stock') }}" class="btn btn-outline-primary">Low Stock</a>
+    </div>
+  </div>
+
+  <div class="row g-4 mb-4">
+    <div class="col-md-6 col-xl-4"><div class="card border-0 shadow-sm dashboard-card"><div class="card-body"><div class="metric-label mb-2">Inventory Value</div><div class="display-6">{{ total_stock_value }}</div></div></div></div>
+    <div class="col-md-6 col-xl-4"><div class="card border-0 shadow-sm dashboard-card"><div class="card-body"><div class="metric-label mb-2">Recent Batches</div><div class="display-6">{{ recent_batches|length }}</div></div></div></div>
+    <div class="col-md-6 col-xl-4"><div class="card border-0 shadow-sm dashboard-card"><div class="card-body"><div class="metric-label mb-2">Tracked Products</div><div class="display-6">{{ rows|length }}</div></div></div></div>
+  </div>
+
+  <div class="card border-0 shadow-sm page-section-card mb-4">
+    <div class="card-body">
+      <form class="row g-3 mb-3">
+        <div class="col-md-5">
+          <input type="search" class="form-control" name="q" value="{{ search }}" placeholder="Search products in inventory">
+        </div>
+        <div class="col-auto"><button class="btn btn-outline-secondary" type="submit">Search</button></div>
+      </form>
+
+      <div class="table-responsive">
+        <table class="table align-middle">
+          <thead><tr><th>Product</th><th>Stock</th><th>Value</th><th>Status</th><th></th></tr></thead>
+          <tbody>
+            {% for row in rows %}
+              <tr>
+                <td>{{ row.product.name }}</td>
+                <td>{{ row.total_quantity }} {{ row.product.unit_type }}</td>
+                <td>{{ row.stock_value }}</td>
+                <td>
+                  {% if row.expired_count %}
+                    <span class="badge text-bg-danger">Expired</span>
+                  {% elif row.near_expiry_count %}
+                    <span class="badge text-bg-warning">Near Expiry</span>
+                  {% elif row.low_stock %}
+                    <span class="badge text-bg-warning">Low Stock</span>
+                  {% else %}
+                    <span class="badge text-bg-success">OK</span>
+                  {% endif %}
+                </td>
+                <td class="text-end"><a href="{{ url_for('owner.product_detail', product_id=row.product.id) }}" class="btn btn-sm btn-outline-primary">Details</a></td>
+              </tr>
+            {% else %}
+              <tr><td colspan="5" class="text-center text-body-secondary py-4">No inventory data available.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="card border-0 shadow-sm page-section-card">
+    <div class="card-body">
+      <h2 class="h5 mb-3">Recent Batches</h2>
+      <div class="table-responsive">
+        <table class="table align-middle">
+          <thead><tr><th>Batch</th><th>Product</th><th>Supplier</th><th>Remaining</th><th>Expiry</th></tr></thead>
+          <tbody>
+            {% for batch in recent_batches %}
+              <tr>
+                <td><a href="{{ url_for('owner.batch_detail', batch_id=batch.id) }}" class="text-decoration-none">{{ batch.batch_code }}</a></td>
+                <td>{{ batch.product.name }}</td>
+                <td>{{ batch.supplier_name }}</td>
+                <td>{{ batch.quantity_remaining }}</td>
+                <td>{{ batch.expiry_date.strftime('%Y-%m-%d') if batch.expiry_date else '—' }}</td>
+              </tr>
+            {% else %}
+              <tr><td colspan="5" class="text-center text-body-secondary py-4">No stock batches yet.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+{% endblock %}

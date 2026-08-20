@@ -1,0 +1,118 @@
+{% extends 'components/base.html' %}
+
+{% block title %}{{ t('nav.staff_dashboard') }}{% endblock %}
+
+{% block content %}
+  {% set subscription_limited = subscription_summary and subscription_summary.status in ['expired', 'suspended'] %}
+  <div class="section-header">
+    <div>
+      <p class="metric-label mb-2">{{ t('dashboard.staff_heading') }}</p>
+      <h1 class="h2 mb-1">{{ t('dashboard.welcome') }}, {{ current_user.full_name }}</h1>
+      <p>{{ business.business_name }} operational workspace.</p>
+    </div>
+    {% if not subscription_limited %}
+      <a href="{{ url_for('staff.sale_new') }}" class="btn btn-primary">{{ t('staff.quick_sale') }}</a>
+    {% endif %}
+  </div>
+
+  {% if subscription_summary %}
+    <div class="alert alert-{{ subscription_summary.severity }} mb-4">
+      <strong>{{ t('nav.subscription') }}:</strong> {{ subscription_summary.status_message }}
+    </div>
+  {% endif %}
+
+  <div class="row g-4">
+    <div class="col-sm-6 col-xl-3"><div class="card dashboard-card"><div class="card-body"><p class="metric-label mb-2">{{ t('dashboard.today_transactions') }}</p><div class="metric-value">{{ dashboard_data.today_transactions }}</div></div></div></div>
+    <div class="col-sm-6 col-xl-3"><div class="card dashboard-card"><div class="card-body"><p class="metric-label mb-2">{{ t('dashboard.today_products_sold') }}</p><div class="metric-value">{{ dashboard_data.today_products_sold }}</div></div></div></div>
+    <div class="col-sm-6 col-xl-3"><div class="card dashboard-card"><div class="card-body"><p class="metric-label mb-2">{{ t('dashboard.available_products') }}</p><div class="metric-value">{{ dashboard_data.available_products }}</div></div></div></div>
+    <div class="col-sm-6 col-xl-3"><div class="card dashboard-card"><div class="card-body"><p class="metric-label mb-2">{{ t('dashboard.low_stock_issues') }}</p><div class="metric-value">{{ dashboard_data.low_stock_count }}</div></div></div></div>
+  </div>
+
+  <div class="row g-4 mt-1">
+    <div class="col-xl-5">
+      <div class="card page-section-card h-100">
+        <div class="card-body">
+          <div class="section-header mb-3">
+            <div>
+              <h2 class="h5 mb-1">{{ t('dashboard.quick_actions') }}</h2>
+              <p>Jump into day-to-day work quickly.</p>
+            </div>
+          </div>
+          <div class="d-grid gap-2">
+            {% if not subscription_limited %}
+              <a href="{{ url_for('staff.sale_new') }}" class="btn btn-primary">{{ t('nav.new_sale') }}</a>
+            {% endif %}
+            <a href="{{ url_for('staff.sales') }}" class="btn btn-outline-secondary">{{ t('nav.sales') }}</a>
+            <a href="{{ url_for('staff.products') }}" class="btn btn-outline-secondary">{{ t('nav.products') }}</a>
+            <a href="{{ url_for('staff.customers') }}" class="btn btn-outline-secondary">{{ t('nav.customers') }}</a>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-xl-7">
+      <div class="card page-section-card h-100">
+        <div class="card-body">
+          <div class="section-header mb-3">
+            <div>
+              <h2 class="h5 mb-1">{{ t('common.recent_sales') }}</h2>
+              <p>Recently recorded transactions.</p>
+            </div>
+            <a href="{{ url_for('staff.sales') }}" class="btn btn-sm btn-outline-secondary">{{ t('common.view') }}</a>
+          </div>
+          <div class="table-responsive">
+            <table class="table align-middle">
+              <thead><tr><th>{{ t('common.date') }}</th><th>{{ t('common.customer') }}</th><th>{{ t('common.status') }}</th><th>{{ t('common.revenue') }}</th></tr></thead>
+              <tbody>
+                {% for sale in dashboard_data.recent_sales %}
+                  <tr>
+                    <td><a href="{{ url_for('staff.sale_detail', sale_id=sale.id) }}" class="text-decoration-none">{{ sale.sale_datetime.strftime('%Y-%m-%d %H:%M') }}</a></td>
+                    <td>{{ sale.customer.name if sale.customer else 'Walk-in' }}</td>
+                    <td><span class="app-status-badge status-{{ sale.payment_status }}">{{ t('status.' ~ sale.payment_status) }}</span></td>
+                    <td>{{ currency(sale.total_revenue, business) }}</td>
+                  </tr>
+                {% else %}
+                  <tr><td colspan="4" class="empty-state">{{ t('common.no_data') }}</td></tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card page-section-card mt-4">
+    <div class="card-body">
+      <div class="section-header mb-3">
+        <div>
+          <h2 class="h5 mb-1">{{ t('dashboard.available_products') }}</h2>
+          <p>Snapshot of current stock available for sale.</p>
+        </div>
+        <a href="{{ url_for('staff.products') }}" class="btn btn-sm btn-outline-secondary">{{ t('common.view') }}</a>
+      </div>
+      <div class="table-responsive">
+        <table class="table align-middle">
+          <thead><tr><th>{{ t('nav.products') }}</th><th>{{ t('common.quantity') }}</th><th>{{ t('common.min_stock') }}</th><th>{{ t('common.status') }}</th></tr></thead>
+          <tbody>
+            {% for row in dashboard_data.product_snapshot %}
+              <tr>
+                <td>{{ row.product.name }}</td>
+                <td>{{ row.total_quantity }} {{ row.product.unit_type }}</td>
+                <td>{{ row.product.min_stock_level }}</td>
+                <td>
+                  {% if row.low_stock %}
+                    <span class="app-status-badge status-low-stock">{{ t('status.low_stock') }}</span>
+                  {% else %}
+                    <span class="app-status-badge status-healthy">{{ t('status.healthy') }}</span>
+                  {% endif %}
+                </td>
+              </tr>
+            {% else %}
+              <tr><td colspan="4" class="empty-state">{{ t('common.no_data') }}</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+{% endblock %}

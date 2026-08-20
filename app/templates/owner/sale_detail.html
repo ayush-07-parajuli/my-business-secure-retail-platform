@@ -1,0 +1,69 @@
+{% extends 'components/base.html' %}
+
+{% block title %}Sale Details{% endblock %}
+
+{% block content %}
+  <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3 mb-4">
+    <div>
+      <h1 class="h3 mb-1">Sale {{ sale.id[:8] }}</h1>
+      <p class="text-body-secondary mb-0">{{ sale.sale_datetime.strftime('%Y-%m-%d %H:%M') }} • {{ sale.customer.name if sale.customer else 'Walk-in customer' }}</p>
+    </div>
+    <div class="d-flex gap-2 flex-wrap">
+      <span class="badge text-bg-light border px-3 py-2">{{ sale.payment_status|capitalize }}</span>
+      {% if panel_prefix == 'owner' and sale.amount_due > 0 and sale.customer %}
+        <a href="{{ url_for('owner.repayment_new', sale_id=sale.id) }}" class="btn btn-primary btn-sm">Record Repayment</a>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="row g-4 mb-4">
+    <div class="col-md-6 col-xl-3"><div class="card border-0 shadow-sm dashboard-card"><div class="card-body"><div class="metric-label mb-2">Revenue</div><div class="display-6">{{ sale.total_revenue }}</div></div></div></div>
+    <div class="col-md-6 col-xl-3"><div class="card border-0 shadow-sm dashboard-card"><div class="card-body"><div class="metric-label mb-2">Gross Profit</div><div class="display-6">{{ sale.total_gross_profit }}</div></div></div></div>
+    <div class="col-md-6 col-xl-3"><div class="card border-0 shadow-sm dashboard-card"><div class="card-body"><div class="metric-label mb-2">Realized Profit</div><div class="display-6">{{ sale.total_realized_profit }}</div></div></div></div>
+    <div class="col-md-6 col-xl-3"><div class="card border-0 shadow-sm dashboard-card"><div class="card-body"><div class="metric-label mb-2">Unrealized Profit</div><div class="display-6">{{ sale.total_unrealized_profit }}</div></div></div></div>
+  </div>
+
+  <div class="row g-4">
+    <div class="col-xl-8">
+      <div class="card border-0 shadow-sm page-section-card">
+        <div class="card-body">
+          <h2 class="h5 mb-3">Sale Items</h2>
+          <div class="table-responsive">
+            <table class="table align-middle">
+              <thead><tr><th>Product</th><th>Batch</th><th>Qty</th><th>Cost</th><th>Price</th><th class="text-end">Subtotal</th><th class="text-end">Profit</th></tr></thead>
+              <tbody>
+                {% for item in sale.items %}
+                  <tr>
+                    <td>{{ item.product.name }}</td>
+                    <td>{{ item.stock_batch.batch_code if item.stock_batch else 'Split/NA' }}</td>
+                    <td>{{ item.quantity }}</td>
+                    <td>{{ item.cost_price }}</td>
+                    <td>{{ item.actual_selling_price }}</td>
+                    <td class="text-end">{{ item.subtotal }}</td>
+                    <td class="text-end">{{ item.item_profit }}</td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-xl-4">
+      <div class="card border-0 shadow-sm page-section-card">
+        <div class="card-body">
+          <h2 class="h5 mb-3">Payment Summary</h2>
+          <div class="d-flex justify-content-between py-2 border-bottom"><span>Payment Mode</span><strong>{{ sale.payment_mode|capitalize }}</strong></div>
+          <div class="d-flex justify-content-between py-2 border-bottom"><span>Amount Paid</span><strong>{{ sale.amount_paid }}</strong></div>
+          <div class="d-flex justify-content-between py-2 border-bottom"><span>Amount Due</span><strong>{{ sale.amount_due }}</strong></div>
+          <div class="d-flex justify-content-between py-2"><span>Created By</span><strong>{{ sale.created_by.full_name }}</strong></div>
+          {% if sale.notes %}
+            <hr>
+            <div class="metric-label mb-2">Notes</div>
+            <p class="mb-0">{{ sale.notes }}</p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}

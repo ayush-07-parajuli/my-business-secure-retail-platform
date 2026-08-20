@@ -1,0 +1,89 @@
+{% extends 'components/base.html' %}
+
+{% block title %}{{ t('admin.users_title') }}{% endblock %}
+
+{% block content %}
+  <div class="section-header">
+    <div>
+      <p class="metric-label mb-2">{{ t('nav.users') }}</p>
+      <h1 class="h2 mb-1">{{ t('admin.users_title') }}</h1>
+      <p>Review company and tenant users across the My Business platform.</p>
+    </div>
+    <a href="{{ url_for('admin.user_new') }}" class="btn btn-primary">Create Admin</a>
+  </div>
+
+  <div class="card page-section-card">
+    <div class="card-body">
+      <form class="filter-toolbar row g-3 align-items-end mb-4">
+        <div class="col-lg-4">
+          <label class="form-label">{{ t('common.search') }}</label>
+          <input class="form-control" name="q" value="{{ search }}" placeholder="{{ t('common.search') }}">
+        </div>
+        <div class="col-md-4 col-lg-3">
+          <label class="form-label">{{ t('common.role') }}</label>
+          <select class="form-select" name="role">
+            <option value="all" {% if role == 'all' %}selected{% endif %}>{{ t('common.all_roles') }}</option>
+            <option value="super_admin" {% if role == 'super_admin' %}selected{% endif %}>{{ t('role.super_admin') }}</option>
+            <option value="ops_admin" {% if role == 'ops_admin' %}selected{% endif %}>{{ t('role.ops_admin') }}</option>
+            <option value="biz_admin" {% if role == 'biz_admin' %}selected{% endif %}>{{ t('role.biz_admin') }}</option>
+            <option value="owner" {% if role == 'owner' %}selected{% endif %}>{{ t('role.owner') }}</option>
+            <option value="staff" {% if role == 'staff' %}selected{% endif %}>{{ t('role.staff') }}</option>
+          </select>
+        </div>
+        <div class="col-md-4 col-lg-3">
+          <label class="form-label">{{ t('common.business') }}</label>
+          <select class="form-select" name="business_id">
+            <option value="all" {% if business_id == 'all' %}selected{% endif %}>{{ t('common.all_businesses') }}</option>
+            {% for business in businesses %}
+              <option value="{{ business.id }}" {% if business_id == business.id %}selected{% endif %}>{{ business.business_name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="col-lg-2 d-flex gap-2">
+          <button class="btn btn-primary flex-fill" type="submit">{{ t('common.apply') }}</button>
+          <a class="btn btn-outline-secondary" href="{{ url_for('admin.users') }}">{{ t('common.reset') }}</a>
+        </div>
+      </form>
+
+      <div class="table-responsive">
+        <table class="table align-middle">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>{{ t('common.role') }}</th>
+              <th>{{ t('common.business') }}</th>
+              <th>Email</th>
+              <th>{{ t('common.status') }}</th>
+              <th>Last Login</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for user in users %}
+              <tr>
+                <td>
+                  <div class="fw-semibold">{{ user.full_name }}</div>
+                  <div class="small text-body-secondary">{{ user.username or '-' }}</div>
+                </td>
+                <td>{{ user.role|replace('_', ' ')|title }}</td>
+                <td>{{ user.business.business_name if user.business else 'Platform' }}</td>
+                <td>{{ user.email }}</td>
+                <td>
+                  <span class="app-status-badge status-{{ user.status }}">
+                    {% if user.status in ['active', 'suspended', 'inactive', 'pending'] %}
+                      {{ t('status.' ~ user.status) }}
+                    {% else %}
+                      {{ user.status|capitalize }}
+                    {% endif %}
+                  </span>
+                </td>
+                <td>{{ user.last_login_at.strftime('%Y-%m-%d %H:%M') if user.last_login_at else 'Never' }}</td>
+              </tr>
+            {% else %}
+              <tr><td colspan="6" class="empty-state">{{ t('common.no_data') }}</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+{% endblock %}

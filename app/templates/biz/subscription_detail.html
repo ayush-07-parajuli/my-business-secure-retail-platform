@@ -1,0 +1,59 @@
+{% extends 'components/base.html' %}
+
+{% block title %}{{ business.business_name }}{% endblock %}
+
+{% block content %}
+  <div class="section-header">
+    <div>
+      <p class="metric-label mb-2">{{ t('nav.business_admin') }}</p>
+      <h1 class="h2 mb-1">{{ business.business_name }}</h1>
+      <p>{{ business.owner_name }} • {{ business.email }}</p>
+    </div>
+  </div>
+
+  <div class="row g-4">
+    <div class="col-lg-4">
+      <div class="card page-section-card">
+        <div class="card-body">
+          <h2 class="h5 mb-3">{{ t('nav.subscription') }}</h2>
+          <div class="insight-grid">
+            <div class="insight-card"><strong>{{ subscription_summary.plan_name }}</strong><span>{{ t('common.plan') }}</span></div>
+            <div class="insight-card"><strong>{{ currency(subscription_summary.monthly_fee) }}</strong><span>{{ t('common.monthly_fee') }}</span></div>
+            <div class="insight-card"><strong>{{ t('status.' ~ subscription_summary.status) }}</strong><span>{{ t('common.status') }}</span></div>
+            <div class="insight-card"><strong>{{ currency(subscription_summary.amount_due) }}</strong><span>{{ t('common.amount_due') }}</span></div>
+          </div>
+          <div class="small mt-3">
+            <div>{{ t('common.start_date') }}: {{ subscription_summary.start_date.strftime('%Y-%m-%d') if subscription_summary.start_date else 'Not set' }}</div>
+            <div>{{ t('common.end_date') }}: {{ subscription_summary.end_date.strftime('%Y-%m-%d') if subscription_summary.end_date else 'Not set' }}</div>
+            <div>{{ t('common.days_remaining') }}: {{ subscription_summary.days_remaining if subscription_summary.days_remaining is not none else 'N/A' }}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-8">
+      <div class="card page-section-card">
+        <div class="card-body">
+          <h2 class="h5 mb-3">Payment History</h2>
+          <div class="table-responsive">
+            <table class="table align-middle">
+              <thead><tr><th>{{ t('common.date') }}</th><th>{{ t('common.payment_method') }}</th><th>{{ t('common.amount_paid') }}</th><th>{{ t('common.status') }}</th><th>{{ t('common.actions') }}</th></tr></thead>
+              <tbody>
+                {% for payment in payments %}
+                  <tr>
+                    <td>{{ payment.submitted_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                    <td>{{ payment.payment_method }}</td>
+                    <td>{{ currency(payment.amount_paid) }}</td>
+                    <td><span class="app-status-badge status-{{ payment.status }}">{{ t('status.' ~ payment.status) }}</span></td>
+                    <td><a href="{{ url_for('biz.payment_detail', payment_id=payment.id) }}" class="btn btn-sm btn-outline-secondary">{{ t('common.view') }}</a></td>
+                  </tr>
+                {% else %}
+                  <tr><td colspan="5" class="empty-state">{{ t('common.no_data') }}</td></tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}

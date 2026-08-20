@@ -1,0 +1,26 @@
+{% extends 'components/base.html' %}
+
+{% block title %}Record Repayment{% endblock %}
+
+{% block content %}
+  <div class="row justify-content-center">
+    <div class="col-xl-7">
+      <div class="card border-0 shadow-sm form-card">
+        <div class="card-body p-4 p-lg-5">
+          <h1 class="h3 mb-2">Record Repayment</h1>
+          <p class="text-body-secondary mb-4">Sale due: {{ sale.amount_due }}{% if sale.customer %} • Customer: {{ sale.customer.name }}{% endif %}</p>
+          <form method="post" novalidate>
+            {{ form.hidden_tag() }}
+            <div class="mb-3"><label class="form-label">Amount Paid</label>{{ form.amount_paid(class="form-control") }}{% for error in form.amount_paid.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}</div>
+            <div class="mb-3"><label class="form-label">Payment Date</label>{{ form.payment_date(class="form-control") }}{% for error in form.payment_date.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}</div>
+            <div class="mb-4"><label class="form-label">Note</label>{{ form.note(class="form-control", rows="4") }}{% for error in form.note.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}</div>
+            <div class="d-flex gap-2">
+              {{ form.submit(class="btn btn-primary") }}
+              <a href="{{ url_for('owner.sale_detail', sale_id=sale.id) }}" class="btn btn-outline-secondary">Cancel</a>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}

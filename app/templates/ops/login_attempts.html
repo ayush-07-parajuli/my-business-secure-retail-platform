@@ -1,0 +1,36 @@
+{% extends 'components/base.html' %}
+
+{% block title %}{{ t('nav.login_attempts') }}{% endblock %}
+
+{% block content %}
+  <div class="section-header">
+    <div>
+      <p class="metric-label mb-2">{{ t('nav.operational_admin') }}</p>
+      <h1 class="h2 mb-1">{{ t('nav.login_attempts') }}</h1>
+      <p>Review recent successful and failed login attempts.</p>
+    </div>
+  </div>
+
+  <div class="card page-section-card">
+    <div class="card-body">
+      <div class="table-responsive">
+        <table class="table align-middle">
+          <thead><tr><th>{{ t('common.date') }}</th><th>Identifier</th><th>{{ t('common.role') }}</th><th>{{ t('common.business') }}</th><th>{{ t('common.status') }}</th></tr></thead>
+          <tbody>
+            {% for attempt in attempts %}
+              <tr>
+                <td>{{ attempt.attempted_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                <td>{{ attempt.attempted_identifier }}</td>
+                <td>{{ attempt.role_attempted or 'Unknown' }}</td>
+                <td>{{ attempt.business.business_name if attempt.business else 'Platform' }}</td>
+                <td><span class="app-status-badge {% if attempt.success %}status-active{% else %}status-suspended{% endif %}">{{ 'Success' if attempt.success else 'Failed' }}</span></td>
+              </tr>
+            {% else %}
+              <tr><td colspan="5" class="empty-state">{{ t('common.no_data') }}</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+{% endblock %}

@@ -1,0 +1,67 @@
+{% extends 'components/base.html' %}
+
+{% block title %}{{ product.name }}{% endblock %}
+
+{% block content %}
+  <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3 mb-4">
+    <div>
+      <h1 class="h3 mb-1">{{ product.name }}</h1>
+      <p class="text-body-secondary mb-0">{{ product.category.name if product.category else 'Uncategorized' }} • {{ product.unit_type }}</p>
+    </div>
+    <div class="d-flex gap-2 flex-wrap">
+      <a href="{{ url_for('owner.product_edit', product_id=product.id) }}" class="btn btn-outline-primary">Edit Product</a>
+      <a href="{{ url_for('owner.inventory_restock') }}" class="btn btn-primary">Restock</a>
+    </div>
+  </div>
+
+  <div class="row g-4 mb-4">
+    <div class="col-md-6 col-xl-3"><div class="card border-0 shadow-sm dashboard-card"><div class="card-body"><div class="metric-label mb-2">Current Stock</div><div class="display-6">{{ summary.total_quantity }}</div></div></div></div>
+    <div class="col-md-6 col-xl-3"><div class="card border-0 shadow-sm dashboard-card"><div class="card-body"><div class="metric-label mb-2">Stock Value</div><div class="display-6">{{ summary.stock_value }}</div></div></div></div>
+    <div class="col-md-6 col-xl-3"><div class="card border-0 shadow-sm dashboard-card"><div class="card-body"><div class="metric-label mb-2">Near Expiry</div><div class="display-6">{{ summary.near_expiry_count }}</div></div></div></div>
+    <div class="col-md-6 col-xl-3"><div class="card border-0 shadow-sm dashboard-card"><div class="card-body"><div class="metric-label mb-2">Expired</div><div class="display-6">{{ summary.expired_count }}</div></div></div></div>
+  </div>
+
+  <div class="row g-4">
+    <div class="col-xl-7">
+      <div class="card border-0 shadow-sm page-section-card">
+        <div class="card-body">
+          <h2 class="h5 mb-3">Recent Batches</h2>
+          <div class="table-responsive">
+            <table class="table align-middle">
+              <thead><tr><th>Batch</th><th>Restocked</th><th>Remaining</th><th>Expiry</th></tr></thead>
+              <tbody>
+                {% for batch in batches %}
+                  <tr>
+                    <td><a href="{{ url_for('owner.batch_detail', batch_id=batch.id) }}" class="text-decoration-none">{{ batch.batch_code }}</a></td>
+                    <td>{{ batch.restock_date.strftime('%Y-%m-%d') }}</td>
+                    <td>{{ batch.quantity_remaining }}</td>
+                    <td>{{ batch.expiry_date.strftime('%Y-%m-%d') if batch.expiry_date else '—' }}</td>
+                  </tr>
+                {% else %}
+                  <tr><td colspan="4" class="text-center text-body-secondary py-4">No batches yet.</td></tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-xl-5">
+      <div class="card border-0 shadow-sm page-section-card">
+        <div class="card-body">
+          <h2 class="h5 mb-3">Recent Sale Lines</h2>
+          <div class="list-group list-group-flush">
+            {% for item in recent_sale_items %}
+              <div class="list-group-item px-0">
+                <div class="d-flex justify-content-between"><span>{{ item.quantity }} sold</span><span>{{ item.subtotal }}</span></div>
+                <div class="small text-body-secondary">{{ item.created_at.strftime('%Y-%m-%d %H:%M') }}</div>
+              </div>
+            {% else %}
+              <div class="text-body-secondary py-4">No sale history yet.</div>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}

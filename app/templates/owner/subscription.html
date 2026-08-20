@@ -1,0 +1,112 @@
+{% extends 'components/base.html' %}
+
+{% block title %}{{ t('nav.subscription') }}{% endblock %}
+
+{% block content %}
+  <div class="section-header">
+    <div>
+      <p class="metric-label mb-2">{{ t('nav.subscription') }}</p>
+      <h1 class="h2 mb-1">{{ business.business_name }}</h1>
+      <p>Manage your My Business plan, renewal status, and payment submissions.</p>
+    </div>
+    <div class="d-flex gap-2 flex-wrap">
+      <a href="{{ url_for('owner.subscription_renew') }}" class="btn btn-primary">Renew / Reactivate</a>
+      <a href="{{ url_for('owner.subscription_submit_payment') }}" class="btn btn-outline-secondary">Submit Payment</a>
+    </div>
+  </div>
+
+  <div class="row g-4">
+    <div class="col-lg-8">
+      <div class="card page-section-card">
+        <div class="card-body">
+          <div class="row g-4">
+            <div class="col-md-6">
+              <p class="metric-label mb-2">{{ t('common.plan') }}</p>
+              <div class="metric-value fs-3">{{ subscription_summary.plan_name }}</div>
+            </div>
+            <div class="col-md-6">
+              <p class="metric-label mb-2">{{ t('common.monthly_fee') }}</p>
+              <div class="metric-value fs-3">{{ currency(subscription_summary.monthly_fee, business) }}</div>
+            </div>
+            <div class="col-md-6">
+              <p class="metric-label mb-2">{{ t('common.status') }}</p>
+              <span class="app-status-badge status-{{ subscription_summary.status }}">{{ t('status.' ~ subscription_summary.status) }}</span>
+            </div>
+            <div class="col-md-6">
+              <p class="metric-label mb-2">{{ t('common.amount_due') }}</p>
+              <div class="metric-value fs-5">{{ currency(subscription_summary.amount_due, business) }}</div>
+            </div>
+            <div class="col-md-6">
+              <p class="metric-label mb-2">{{ t('common.start_date') }}</p>
+              <div>{{ subscription_summary.start_date.strftime('%Y-%m-%d') if subscription_summary.start_date else 'Not set' }}</div>
+            </div>
+            <div class="col-md-6">
+              <p class="metric-label mb-2">{{ t('common.end_date') }}</p>
+              <div>{{ subscription_summary.end_date.strftime('%Y-%m-%d') if subscription_summary.end_date else 'Not set' }}</div>
+            </div>
+            <div class="col-md-6">
+              <p class="metric-label mb-2">{{ t('common.days_remaining') }}</p>
+              <div>{{ subscription_summary.days_remaining if subscription_summary.days_remaining is not none else 'N/A' }}</div>
+            </div>
+            <div class="col-md-6">
+              <p class="metric-label mb-2">{{ t('common.note') }}</p>
+              <div>{{ subscription_summary.payment_notes or 'No extra notes yet.' }}</div>
+            </div>
+          </div>
+
+          <div class="alert alert-{{ subscription_summary.severity }} mt-4 mb-0">
+            {{ subscription_summary.status_message }}
+          </div>
+        </div>
+      </div>
+
+      <div class="card page-section-card mt-4">
+        <div class="card-body">
+          <h2 class="h5 mb-3">Payment Instructions</h2>
+          <p class="text-body-secondary">Pay manually using eSewa, Khalti, bank transfer, or cash, then submit the payment details for company approval.</p>
+          <div class="insight-grid">
+            <div class="insight-card"><strong>eSewa</strong><span>Manual transfer accepted</span></div>
+            <div class="insight-card"><strong>Khalti</strong><span>Manual wallet transfer</span></div>
+            <div class="insight-card"><strong>Bank</strong><span>Bank transfer with transaction reference</span></div>
+            <div class="insight-card"><strong>Cash</strong><span>Cash submission accepted</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-4">
+      <div class="card page-section-card">
+        <div class="card-body">
+          <h2 class="h5 mb-3">Full Plan Includes</h2>
+          <ul class="mb-0">
+            {% for feature in subscription_summary.features %}
+              <li class="mb-2">{{ feature }}</li>
+            {% endfor %}
+          </ul>
+        </div>
+      </div>
+
+      <div class="card page-section-card mt-4">
+        <div class="card-body">
+          <h2 class="h5 mb-3">Recent Subscription Payments</h2>
+          <div class="table-responsive">
+            <table class="table align-middle">
+              <thead><tr><th>{{ t('common.date') }}</th><th>{{ t('common.status') }}</th><th>{{ t('common.amount_paid') }}</th></tr></thead>
+              <tbody>
+                {% for payment in recent_payments %}
+                  <tr>
+                    <td>{{ payment.submitted_at.strftime('%Y-%m-%d') }}</td>
+                    <td><span class="app-status-badge status-{{ payment.status }}">{{ t('status.' ~ payment.status) }}</span></td>
+                    <td>{{ currency(payment.amount_paid, business) }}</td>
+                  </tr>
+                {% else %}
+                  <tr><td colspan="3" class="empty-state">{{ t('common.no_data') }}</td></tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}

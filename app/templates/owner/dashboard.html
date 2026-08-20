@@ -1,0 +1,252 @@
+{% extends 'components/base.html' %}
+
+{% block title %}{{ t('nav.owner_dashboard') }}{% endblock %}
+
+{% block content %}
+  {% set metrics = dashboard_data.metrics %}
+  {% set period = dashboard_data.period.period %}
+  {% set subscription_limited = subscription_summary and subscription_summary.status in ['expired', 'suspended'] %}
+
+  <div class="section-header">
+    <div>
+      <p class="metric-label mb-2">{{ t('dashboard.owner_heading') }}</p>
+      <h1 class="h2 mb-1">{{ t('dashboard.welcome') }}, {{ current_user.full_name }}</h1>
+      <p>{{ business.business_name }} • {{ dashboard_data.period.label }}</p>
+    </div>
+    <div class="d-flex flex-wrap gap-2">
+      {% if not subscription_limited %}
+        <a class="btn btn-outline-secondary{% if period == 'today' %} active{% endif %}" href="{{ url_for('owner.dashboard', period='today') }}">{{ t('dashboard.today') }}</a>
+        <a class="btn btn-outline-secondary{% if period == 'month' %} active{% endif %}" href="{{ url_for('owner.dashboard', period='month') }}">{{ t('dashboard.this_month') }}</a>
+        <a class="btn btn-outline-secondary{% if period == 'year' %} active{% endif %}" href="{{ url_for('owner.dashboard', period='year') }}">{{ t('dashboard.this_year') }}</a>
+        <a class="btn btn-outline-secondary{% if period == 'all' %} active{% endif %}" href="{{ url_for('owner.dashboard', period='all') }}">{{ t('dashboard.all_time') }}</a>
+        <a href="{{ url_for('owner.sale_new') }}" class="btn btn-primary">{{ t('nav.new_sale') }}</a>
+      {% endif %}
+      <a href="{{ url_for('owner.subscription') }}" class="btn btn-outline-dark">{{ t('nav.subscription') }}</a>
+    </div>
+  </div>
+
+  {% if subscription_summary %}
+    <div class="alert alert-{{ subscription_summary.severity }} mb-4">
+      <div class="d-flex flex-column flex-lg-row justify-content-between gap-3 align-items-lg-center">
+        <div>
+          <strong>{{ t('nav.subscription') }}:</strong> {{ subscription_summary.status_message }}
+          <div class="small mt-1">
+            {{ t('common.plan') }}: {{ subscription_summary.plan_name }} |
+            {{ t('common.monthly_fee') }}: {{ currency(subscription_summary.monthly_fee, business) }} |
+            {{ t('common.status') }}: {{ t('status.' ~ subscription_summary.status) }}
+            {% if subscription_summary.end_date %}
+              | {{ t('common.end_date') }}: {{ subscription_summary.end_date.strftime('%Y-%m-%d') }}
+            {% endif %}
+          </div>
+        </div>
+        <a href="{{ url_for('owner.subscription_submit_payment') }}" class="btn btn-outline-dark">Submit Payment</a>
+      </div>
+    </div>
+  {% endif %}
+
+  <div class="row g-4">
+    <div class="col-sm-6 col-xxl-3"><div class="card dashboard-card"><div class="card-body"><p class="metric-label mb-2">{{ t('common.revenue') }}</p><div class="metric-value">{{ currency(metrics.total_revenue, business) }}</div></div></div></div>
+    <div class="col-sm-6 col-xxl-3"><div class="card dashboard-card"><div class="card-body"><p class="metric-label mb-2">{{ t('common.gross_profit') }}</p><div class="metric-value">{{ currency(metrics.gross_profit, business) }}</div></div></div></div>
+    <div class="col-sm-6 col-xxl-3"><div class="card dashboard-card"><div class="card-body"><p class="metric-label mb-2">{{ t('common.realized_profit') }}</p><div class="metric-value">{{ currency(metrics.realized_profit, business) }}</div></div></div></div>
+    <div class="col-sm-6 col-xxl-3"><div class="card dashboard-card"><div class="card-body"><p class="metric-label mb-2">{{ t('common.unrealized_profit') }}</p><div class="metric-value">{{ currency(metrics.unrealized_profit, business) }}</div></div></div></div>
+    <div class="col-sm-6 col-xxl-3"><div class="card dashboard-card"><div class="card-body"><p class="metric-label mb-2">{{ t('dashboard.cash_collected') }}</p><div class="metric-value">{{ currency(metrics.cash_collected, business) }}</div></div></div></div>
+    <div class="col-sm-6 col-xxl-3"><div class="card dashboard-card"><div class="card-body"><p class="metric-label mb-2">{{ t('dashboard.credit_outstanding') }}</p><div class="metric-value">{{ currency(metrics.credit_outstanding, business) }}</div></div></div></div>
+    <div class="col-sm-6 col-xxl-3"><div class="card dashboard-card"><div class="card-body"><p class="metric-label mb-2">{{ t('dashboard.total_transactions') }}</p><div class="metric-value">{{ metrics.total_transactions }}</div></div></div></div>
+    <div class="col-sm-6 col-xxl-3"><div class="card dashboard-card"><div class="card-body"><p class="metric-label mb-2">{{ t('dashboard.total_quantity_sold') }}</p><div class="metric-value">{{ metrics.total_quantity_sold }}</div></div></div></div>
+  </div>
+
+  <div class="insight-grid my-4">
+    <div class="insight-card"><strong>{{ metrics.total_products }}</strong><span>{{ t('dashboard.total_products') }}</span></div>
+    <div class="insight-card"><strong>{{ metrics.total_customers }}</strong><span>{{ t('common.customers') }}</span></div>
+    <div class="insight-card"><strong>{{ metrics.low_stock_count }}</strong><span>{{ t('dashboard.low_stock_issues') }}</span></div>
+    <div class="insight-card"><strong>{{ metrics.near_expiry_count }}</strong><span>{{ t('dashboard.near_expiry_count') }}</span></div>
+    <div class="insight-card"><strong>{{ metrics.expired_stock_count }}</strong><span>{{ t('dashboard.expired_stock_count') }}</span></div>
+    <div class="insight-card"><strong>{{ currency(metrics.stock_value_remaining, business) }}</strong><span>{{ t('dashboard.stock_value_remaining') }}</span></div>
+  </div>
+
+  {% if not subscription_limited %}
+    <div class="row g-4">
+      <div class="col-xl-8">
+        <div class="card chart-card page-section-card">
+          <div class="card-body">
+            <div class="section-header mb-3">
+              <div>
+                <h2 class="h5 mb-1">{{ t('dashboard.revenue_trend') }}</h2>
+                <p>Revenue and cash collection across the selected period.</p>
+              </div>
+            </div>
+            <canvas id="ownerRevenueTrendChart"></canvas>
+          </div>
+        </div>
+      </div>
+      <div class="col-xl-4">
+        <div class="card chart-card page-section-card">
+          <div class="card-body">
+            <div class="section-header mb-3">
+              <div>
+                <h2 class="h5 mb-1">{{ t('dashboard.payment_modes') }}</h2>
+                <p>Revenue mix by payment mode.</p>
+              </div>
+            </div>
+            <canvas id="ownerPaymentModesChart"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row g-4 mt-1">
+      <div class="col-xl-6">
+        <div class="card chart-card page-section-card">
+          <div class="card-body">
+            <div class="section-header mb-3">
+              <div>
+                <h2 class="h5 mb-1">{{ t('dashboard.profit_trend') }}</h2>
+                <p>Gross, realized, and unrealized profit movement.</p>
+              </div>
+            </div>
+            <canvas id="ownerProfitTrendChart"></canvas>
+          </div>
+        </div>
+      </div>
+      <div class="col-xl-6">
+        <div class="card chart-card page-section-card">
+          <div class="card-body">
+            <div class="section-header mb-3">
+              <div>
+                <h2 class="h5 mb-1">{{ t('dashboard.top_selling_products') }}</h2>
+                <p>Best-performing products by quantity sold.</p>
+              </div>
+            </div>
+            <canvas id="ownerTopProductsChart"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row g-4 mt-1">
+      <div class="col-xl-6">
+        <div class="card chart-card page-section-card">
+          <div class="card-body">
+            <div class="section-header mb-3">
+              <div>
+                <h2 class="h5 mb-1">{{ t('dashboard.profitable_products') }}</h2>
+                <p>Products contributing the most profit.</p>
+              </div>
+            </div>
+            <canvas id="ownerProfitableProductsChart"></canvas>
+          </div>
+        </div>
+      </div>
+      <div class="col-xl-6">
+        <div class="card page-section-card h-100">
+          <div class="card-body">
+            <div class="section-header mb-3">
+              <div>
+                <h2 class="h5 mb-1">{{ t('common.recent_sales') }}</h2>
+                <p>Latest transactions inside your business.</p>
+              </div>
+              <a href="{{ url_for('owner.sales') }}" class="btn btn-sm btn-outline-secondary">{{ t('common.view') }}</a>
+            </div>
+            <div class="table-responsive">
+              <table class="table align-middle">
+                <thead><tr><th>{{ t('common.date') }}</th><th>{{ t('common.customer') }}</th><th>{{ t('common.status') }}</th><th>{{ t('common.revenue') }}</th></tr></thead>
+                <tbody>
+                  {% for sale in dashboard_data.recent_sales %}
+                    <tr>
+                      <td><a href="{{ url_for('owner.sale_detail', sale_id=sale.id) }}" class="text-decoration-none">{{ sale.sale_datetime.strftime('%Y-%m-%d %H:%M') }}</a></td>
+                      <td>{{ sale.customer.name if sale.customer else 'Walk-in' }}</td>
+                      <td><span class="app-status-badge status-{{ sale.payment_status }}">{{ t('status.' ~ sale.payment_status) }}</span></td>
+                      <td>{{ currency(sale.total_revenue, business) }}</td>
+                    </tr>
+                  {% else %}
+                    <tr><td colspan="4" class="empty-state">{{ t('common.no_data') }}</td></tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card page-section-card mt-4">
+      <div class="card-body">
+        <div class="section-header mb-3">
+          <div>
+            <h2 class="h5 mb-1">{{ t('dashboard.low_stock_issues') }}</h2>
+            <p>Products that need attention soon.</p>
+          </div>
+          <a href="{{ url_for('owner.report_low_stock') }}" class="btn btn-sm btn-outline-secondary">{{ t('common.view') }}</a>
+        </div>
+        <div class="table-responsive">
+          <table class="table align-middle">
+            <thead><tr><th>{{ t('nav.products') }}</th><th>{{ t('common.quantity') }}</th><th>{{ t('common.min_stock') }}</th><th>{{ t('common.status') }}</th></tr></thead>
+            <tbody>
+              {% for row in dashboard_data.low_stock_preview %}
+                <tr>
+                  <td>{{ row.product.name }}</td>
+                  <td>{{ row.total_quantity }} {{ row.product.unit_type }}</td>
+                  <td>{{ row.product.min_stock_level }}</td>
+                  <td><span class="app-status-badge status-low-stock">{{ t('status.low_stock') }}</span></td>
+                </tr>
+              {% else %}
+                <tr><td colspan="4" class="empty-state">{{ t('common.no_data') }}</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  {% else %}
+    <div class="card page-section-card">
+      <div class="card-body p-4">
+        <h2 class="h5 mb-2">{{ t('nav.subscription') }}</h2>
+        <p class="text-body-secondary mb-3">
+          Sales creation, restocking, advanced analytics, and reporting are temporarily restricted until the subscription is renewed and approved.
+        </p>
+        <div class="d-flex gap-2 flex-wrap">
+          <a href="{{ url_for('owner.subscription') }}" class="btn btn-primary">{{ t('nav.subscription') }}</a>
+          <a href="{{ url_for('owner.subscription_submit_payment') }}" class="btn btn-outline-secondary">Submit Payment</a>
+        </div>
+      </div>
+    </div>
+  {% endif %}
+{% endblock %}
+
+{% block extra_scripts %}
+  {% if not subscription_limited %}
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+    <script>
+      const ownerRevenueTrend = {{ dashboard_data.charts.revenue_trend|tojson }};
+      const ownerProfitTrend = {{ dashboard_data.charts.profit_trend|tojson }};
+      const ownerTopProducts = {{ dashboard_data.charts.top_products|tojson }};
+      const ownerProfitableProducts = {{ dashboard_data.charts.profitable_products|tojson }};
+      const ownerPaymentModes = {{ dashboard_data.charts.payment_modes|tojson }};
+
+      const baseLineOptions = {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { position: "bottom" } },
+        scales: { y: { beginAtZero: true } }
+      };
+
+      new Chart(document.getElementById("ownerRevenueTrendChart"), { type: "line", data: ownerRevenueTrend, options: baseLineOptions });
+      new Chart(document.getElementById("ownerProfitTrendChart"), { type: "line", data: ownerProfitTrend, options: baseLineOptions });
+      new Chart(document.getElementById("ownerTopProductsChart"), {
+        type: "bar",
+        data: ownerTopProducts,
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }
+      });
+      new Chart(document.getElementById("ownerProfitableProductsChart"), {
+        type: "bar",
+        data: ownerProfitableProducts,
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }
+      });
+      new Chart(document.getElementById("ownerPaymentModesChart"), {
+        type: "doughnut",
+        data: ownerPaymentModes,
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: "bottom" } } }
+      });
+    </script>
+  {% endif %}
+{% endblock %}

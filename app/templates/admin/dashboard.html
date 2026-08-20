@@ -1,0 +1,306 @@
+{% extends 'components/base.html' %}
+
+{% block title %}{{ t('nav.admin_dashboard') }}{% endblock %}
+
+{% block content %}
+  {% set metrics = dashboard_data.metrics %}
+  {% set tenant = dashboard_data.tenant_activity %}
+  <div class="section-header">
+    <div>
+      <p class="metric-label mb-2">{{ t('dashboard.super_admin_heading') }}</p>
+      <h1 class="h2 mb-1">{{ t('dashboard.welcome') }}, {{ current_user.full_name }}</h1>
+      <p>Monitor My Business platform growth, subscription collections, operational risk, and tenant activity from one place.</p>
+    </div>
+    <div class="d-flex flex-wrap gap-2">
+      <a class="btn btn-outline-secondary{% if dashboard_data.period.period == 'month' %} active{% endif %}" href="{{ url_for('admin.dashboard', period='month') }}">{{ t('dashboard.this_month') }}</a>
+      <a class="btn btn-outline-secondary{% if dashboard_data.period.period == 'year' %} active{% endif %}" href="{{ url_for('admin.dashboard', period='year') }}">{{ t('dashboard.this_year') }}</a>
+      <a class="btn btn-outline-secondary{% if dashboard_data.period.period == 'all' %} active{% endif %}" href="{{ url_for('admin.dashboard', period='all') }}">{{ t('dashboard.all_time') }}</a>
+      <a class="btn btn-outline-secondary" href="{{ url_for('ops.dashboard') }}">{{ t('nav.operational_admin') }}</a>
+      <a class="btn btn-outline-secondary" href="{{ url_for('biz.dashboard') }}">{{ t('nav.business_admin') }}</a>
+      <a class="btn btn-primary" href="{{ url_for('admin.business_new') }}">{{ t('common.create') }} {{ t('common.business') }}</a>
+    </div>
+  </div>
+
+  <div class="row g-4">
+    <div class="col-sm-6 col-xxl-3"><div class="card dashboard-card"><div class="card-body"><p class="metric-label mb-2">{{ t('dashboard.total_businesses') }}</p><div class="metric-value">{{ metrics.total_businesses }}</div></div></div></div>
+    <div class="col-sm-6 col-xxl-3"><div class="card dashboard-card"><div class="card-body"><p class="metric-label mb-2">{{ t('dashboard.active_businesses') }}</p><div class="metric-value">{{ metrics.active_businesses }}</div></div></div></div>
+    <div class="col-sm-6 col-xxl-3"><div class="card dashboard-card"><div class="card-body"><p class="metric-label mb-2">{{ t('dashboard.suspended_businesses') }}</p><div class="metric-value">{{ metrics.suspended_businesses }}</div></div></div></div>
+    <div class="col-sm-6 col-xxl-3"><div class="card dashboard-card"><div class="card-body"><p class="metric-label mb-2">{{ t('dashboard.total_users') }}</p><div class="metric-value">{{ metrics.total_users }}</div></div></div></div>
+    <div class="col-sm-6 col-xxl-3"><div class="card dashboard-card"><div class="card-body"><p class="metric-label mb-2">{{ t('dashboard.total_owners') }}</p><div class="metric-value">{{ metrics.total_owners }}</div></div></div></div>
+    <div class="col-sm-6 col-xxl-3"><div class="card dashboard-card"><div class="card-body"><p class="metric-label mb-2">{{ t('dashboard.total_staff') }}</p><div class="metric-value">{{ metrics.total_staff }}</div></div></div></div>
+    <div class="col-sm-6 col-xxl-3"><div class="card dashboard-card"><div class="card-body"><p class="metric-label mb-2">{{ t('role.ops_admin') }}</p><div class="metric-value">{{ metrics.total_ops_admins }}</div></div></div></div>
+    <div class="col-sm-6 col-xxl-3"><div class="card dashboard-card"><div class="card-body"><p class="metric-label mb-2">{{ t('role.biz_admin') }}</p><div class="metric-value">{{ metrics.total_biz_admins }}</div></div></div></div>
+    <div class="col-sm-6 col-xxl-3"><div class="card dashboard-card"><div class="card-body"><p class="metric-label mb-2">{{ t('dashboard.active_subscriptions') }}</p><div class="metric-value">{{ metrics.active_subscriptions }}</div></div></div></div>
+    <div class="col-sm-6 col-xxl-3"><div class="card dashboard-card"><div class="card-body"><p class="metric-label mb-2">{{ t('dashboard.pending_approvals') }}</p><div class="metric-value">{{ metrics.pending_approvals }}</div></div></div></div>
+    <div class="col-sm-6 col-xxl-3"><div class="card dashboard-card"><div class="card-body"><p class="metric-label mb-2">{{ t('dashboard.expired_subscriptions') }}</p><div class="metric-value">{{ metrics.expired_subscriptions }}</div></div></div></div>
+    <div class="col-sm-6 col-xxl-3"><div class="card dashboard-card"><div class="card-body"><p class="metric-label mb-2">{{ t('dashboard.monthly_subscription_revenue') }}</p><div class="metric-value">{{ currency(metrics.monthly_subscription_revenue) }}</div></div></div></div>
+    <div class="col-sm-6 col-xxl-3"><div class="card dashboard-card"><div class="card-body"><p class="metric-label mb-2">{{ t('dashboard.yearly_subscription_revenue') }}</p><div class="metric-value">{{ currency(metrics.yearly_subscription_revenue) }}</div></div></div></div>
+    <div class="col-sm-6 col-xxl-3"><div class="card dashboard-card"><div class="card-body"><p class="metric-label mb-2">{{ t('dashboard.total_collected_subscription_payments') }}</p><div class="metric-value">{{ currency(metrics.total_collected_subscription_payments) }}</div></div></div></div>
+    <div class="col-sm-6 col-xxl-3"><div class="card dashboard-card"><div class="card-body"><p class="metric-label mb-2">{{ t('dashboard.total_outstanding_subscription_dues') }}</p><div class="metric-value">{{ currency(metrics.total_outstanding_subscription_dues) }}</div></div></div></div>
+    <div class="col-sm-6 col-xxl-3"><div class="card dashboard-card"><div class="card-body"><p class="metric-label mb-2">{{ t('dashboard.estimated_platform_profit') }}</p><div class="metric-value">{{ currency(metrics.estimated_platform_profit) }}</div></div></div></div>
+  </div>
+
+  <div class="row g-4 mt-1">
+    <div class="col-xl-8">
+      <div class="card chart-card page-section-card">
+        <div class="card-body">
+          <div class="section-header mb-3">
+            <div>
+              <h2 class="h5 mb-1">{{ t('dashboard.subscription_revenue_trend') }}</h2>
+              <p>{{ dashboard_data.period.label }}</p>
+            </div>
+          </div>
+          <canvas id="subscriptionRevenueChart"></canvas>
+        </div>
+      </div>
+    </div>
+    <div class="col-xl-4">
+      <div class="card chart-card page-section-card">
+        <div class="card-body">
+          <div class="section-header mb-3">
+            <div>
+              <h2 class="h5 mb-1">{{ t('dashboard.business_growth') }}</h2>
+              <p>Registrations over time</p>
+            </div>
+          </div>
+          <canvas id="businessGrowthChart"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row g-4 mt-1">
+    <div class="col-xl-4">
+      <div class="card page-section-card">
+        <div class="card-body">
+          <h2 class="h5 mb-3">{{ t('dashboard.quick_actions') }}</h2>
+          <div class="d-grid gap-2">
+            <a class="btn btn-primary" href="{{ url_for('admin.businesses') }}">{{ t('nav.businesses') }}</a>
+            <a class="btn btn-outline-secondary" href="{{ url_for('admin.users') }}">{{ t('nav.users') }}</a>
+            <a class="btn btn-outline-secondary" href="{{ url_for('biz.payments') }}">{{ t('nav.payments') }}</a>
+            <a class="btn btn-outline-secondary" href="{{ url_for('biz.revenue') }}">{{ t('nav.revenue') }}</a>
+            <a class="btn btn-outline-secondary" href="{{ url_for('admin.platform_report') }}">{{ t('nav.reports') }}</a>
+            <a class="btn btn-outline-secondary" href="{{ url_for('admin.login_attempts') }}">{{ t('nav.login_attempts') }}</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="card page-section-card mt-4">
+        <div class="card-body">
+          <h2 class="h5 mb-3">{{ t('common.alerts') }}</h2>
+          <div class="insight-grid">
+            <div class="insight-card"><strong>{{ dashboard_data.suspicious_summary.failed_logins_24h }}</strong><span>{{ t('dashboard.failed_logins_24h') }}</span></div>
+            <div class="insight-card"><strong>{{ dashboard_data.suspicious_summary.suspended_login_blocks }}</strong><span>{{ t('dashboard.suspended_login_blocks') }}</span></div>
+            <div class="insight-card"><strong>{{ metrics.pending_approvals }}</strong><span>{{ t('dashboard.pending_approvals') }}</span></div>
+            <div class="insight-card"><strong>{{ metrics.expired_subscriptions }}</strong><span>{{ t('dashboard.expired_subscriptions') }}</span></div>
+            <div class="insight-card"><strong>{{ metrics.low_stock_issues }}</strong><span>{{ t('dashboard.low_stock_issues') }}</span></div>
+            <div class="insight-card"><strong>{{ metrics.near_expiry_count }}</strong><span>{{ t('dashboard.near_expiry_count') }}</span></div>
+            <div class="insight-card"><strong>{{ metrics.expired_stock_count }}</strong><span>{{ t('dashboard.expired_stock_count') }}</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-xl-8">
+      <div class="card page-section-card">
+        <div class="card-body">
+          <div class="section-header mb-3">
+            <div>
+              <h2 class="h5 mb-1">{{ t('dashboard.tenant_business_activity_overview') }}</h2>
+              <p>These totals summarize tenant usage and store activity. They are not company profit metrics.</p>
+            </div>
+          </div>
+          <div class="row g-3">
+            <div class="col-md-6 col-xl-3"><div class="insight-card h-100"><strong>{{ tenant.total_products }}</strong><span>{{ t('dashboard.total_products') }}</span></div></div>
+            <div class="col-md-6 col-xl-3"><div class="insight-card h-100"><strong>{{ tenant.total_tenant_sales }}</strong><span>{{ t('dashboard.total_tenant_sales') }}</span></div></div>
+            <div class="col-md-6 col-xl-3"><div class="insight-card h-100"><strong>{{ currency(tenant.total_tenant_revenue) }}</strong><span>{{ t('dashboard.total_tenant_revenue') }}</span></div></div>
+            <div class="col-md-6 col-xl-3"><div class="insight-card h-100"><strong>{{ tenant.total_tenant_transactions }}</strong><span>{{ t('dashboard.total_tenant_transactions') }}</span></div></div>
+            <div class="col-md-6 col-xl-4"><div class="insight-card h-100"><strong>{{ currency(tenant.total_tenant_credit_outstanding) }}</strong><span>{{ t('dashboard.total_credit_outstanding') }}</span></div></div>
+            <div class="col-md-6 col-xl-4"><div class="insight-card h-100"><strong>{{ metrics.low_stock_issues }}</strong><span>{{ t('dashboard.low_stock_issues') }}</span></div></div>
+            <div class="col-md-6 col-xl-4"><div class="insight-card h-100"><strong>{{ metrics.near_expiry_count + metrics.expired_stock_count }}</strong><span>{{ t('common.alerts') }}</span></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row g-4 mt-1">
+    <div class="col-xl-8">
+      <div class="card chart-card page-section-card">
+        <div class="card-body">
+          <div class="section-header mb-3">
+            <div>
+              <h2 class="h5 mb-1">{{ t('dashboard.tenant_activity_trend') }}</h2>
+              <p>{{ dashboard_data.period.label }}</p>
+            </div>
+          </div>
+          <canvas id="tenantActivityChart"></canvas>
+        </div>
+      </div>
+    </div>
+    <div class="col-xl-4">
+      <div class="card chart-card page-section-card">
+        <div class="card-body">
+          <div class="section-header mb-3">
+            <div>
+              <h2 class="h5 mb-1">{{ t('dashboard.top_businesses') }}</h2>
+              <p>Most active tenant businesses in the selected period.</p>
+            </div>
+          </div>
+          <canvas id="topBusinessesChart"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row g-4 mt-1">
+    <div class="col-xl-6">
+      <div class="card page-section-card">
+        <div class="card-body">
+          <div class="section-header mb-3">
+            <div>
+              <h2 class="h5 mb-1">{{ t('common.recent_activity') }}</h2>
+              <p>Latest audit trail across the platform.</p>
+            </div>
+            <a href="{{ url_for('admin.activity_logs') }}" class="btn btn-sm btn-outline-secondary">{{ t('common.view') }}</a>
+          </div>
+          <div class="table-responsive">
+            <table class="table align-middle">
+              <thead><tr><th>{{ t('common.date') }}</th><th>Action</th><th>{{ t('common.business') }}</th></tr></thead>
+              <tbody>
+                {% for log in dashboard_data.recent_logs %}
+                  <tr>
+                    <td>{{ log.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                    <td>{{ log.description }}</td>
+                    <td>{{ log.business.business_name if log.business else 'Platform' }}</td>
+                  </tr>
+                {% else %}
+                  <tr><td colspan="3" class="empty-state">{{ t('common.no_data') }}</td></tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-xl-6">
+      <div class="card page-section-card">
+        <div class="card-body">
+          <div class="section-header mb-3">
+            <div>
+              <h2 class="h5 mb-1">{{ t('common.recent_logins') }}</h2>
+              <p>Successful and failed login events.</p>
+            </div>
+            <a href="{{ url_for('admin.login_attempts') }}" class="btn btn-sm btn-outline-secondary">{{ t('common.view') }}</a>
+          </div>
+          <div class="table-responsive">
+            <table class="table align-middle">
+              <thead><tr><th>{{ t('common.date') }}</th><th>Identifier</th><th>{{ t('common.status') }}</th></tr></thead>
+              <tbody>
+                {% for attempt in dashboard_data.recent_login_attempts %}
+                  <tr>
+                    <td>{{ attempt.attempted_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                    <td>{{ attempt.attempted_identifier }}</td>
+                    <td>
+                      <span class="app-status-badge {% if attempt.success %}status-active{% else %}status-suspended{% endif %}">
+                        {{ 'Success' if attempt.success else 'Failed' }}
+                      </span>
+                    </td>
+                  </tr>
+                {% else %}
+                  <tr><td colspan="3" class="empty-state">{{ t('common.no_data') }}</td></tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row g-4 mt-1">
+    <div class="col-12">
+      <div class="card page-section-card">
+        <div class="card-body">
+          <div class="section-header mb-3">
+            <div>
+              <h2 class="h5 mb-1">{{ t('dashboard.top_businesses') }}</h2>
+              <p>Tenant business usage summary for the selected period.</p>
+            </div>
+          </div>
+          <div class="table-responsive">
+            <table class="table align-middle">
+              <thead>
+                <tr>
+                  <th>{{ t('common.business') }}</th>
+                  <th>{{ t('dashboard.tenant_revenue') }}</th>
+                  <th>{{ t('common.credit_outstanding') }}</th>
+                  <th>{{ t('common.transactions') }}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for row in dashboard_data.top_business_rows %}
+                  <tr>
+                    <td>{{ row.business_name }}</td>
+                    <td>{{ currency(row.revenue) }}</td>
+                    <td>{{ currency(row.credit_due) }}</td>
+                    <td>{{ row.sales_count }}</td>
+                  </tr>
+                {% else %}
+                  <tr><td colspan="4" class="empty-state">{{ t('common.no_data') }}</td></tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}
+
+{% block extra_scripts %}
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+  <script>
+    const businessGrowthData = {{ dashboard_data.charts.business_growth|tojson }};
+    const subscriptionRevenueData = {{ dashboard_data.charts.subscription_revenue|tojson }};
+    const tenantActivityData = {{ dashboard_data.charts.tenant_activity_trend|tojson }};
+    const topBusinessesData = {{ dashboard_data.charts.top_businesses|tojson }};
+
+    const lineOptions = {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { position: "bottom" } },
+      scales: { y: { beginAtZero: true } }
+    };
+
+    new Chart(document.getElementById("businessGrowthChart"), {
+      type: "line",
+      data: businessGrowthData,
+      options: lineOptions
+    });
+
+    new Chart(document.getElementById("subscriptionRevenueChart"), {
+      type: "line",
+      data: subscriptionRevenueData,
+      options: lineOptions
+    });
+
+    new Chart(document.getElementById("tenantActivityChart"), {
+      type: "line",
+      data: tenantActivityData,
+      options: lineOptions
+    });
+
+    new Chart(document.getElementById("topBusinessesChart"), {
+      type: "bar",
+      data: topBusinessesData,
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: { y: { beginAtZero: true } }
+      }
+    });
+  </script>
+{% endblock %}

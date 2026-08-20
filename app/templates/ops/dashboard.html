@@ -1,0 +1,105 @@
+{% extends 'components/base.html' %}
+
+{% block title %}{{ t('nav.dashboard') }}{% endblock %}
+
+{% block content %}
+  {% set metrics = dashboard_data.metrics %}
+  <div class="section-header">
+    <div>
+      <p class="metric-label mb-2">{{ t('nav.operational_admin') }}</p>
+      <h1 class="h2 mb-1">{{ t('dashboard.welcome') }}, {{ current_user.full_name }}</h1>
+      <p>Monitor platform operations, business status, users, and security activity across My Business.</p>
+    </div>
+  </div>
+
+  <div class="row g-4">
+    <div class="col-sm-6 col-xl-3"><div class="card dashboard-card"><div class="card-body"><p class="metric-label mb-2">{{ t('dashboard.total_businesses') }}</p><div class="metric-value">{{ metrics.total_businesses }}</div></div></div></div>
+    <div class="col-sm-6 col-xl-3"><div class="card dashboard-card"><div class="card-body"><p class="metric-label mb-2">{{ t('dashboard.active_businesses') }}</p><div class="metric-value">{{ metrics.active_businesses }}</div></div></div></div>
+    <div class="col-sm-6 col-xl-3"><div class="card dashboard-card"><div class="card-body"><p class="metric-label mb-2">{{ t('dashboard.suspended_businesses') }}</p><div class="metric-value">{{ metrics.suspended_businesses }}</div></div></div></div>
+    <div class="col-sm-6 col-xl-3"><div class="card dashboard-card"><div class="card-body"><p class="metric-label mb-2">{{ t('dashboard.total_users') }}</p><div class="metric-value">{{ metrics.total_users }}</div></div></div></div>
+    <div class="col-sm-6 col-xl-3"><div class="card dashboard-card"><div class="card-body"><p class="metric-label mb-2">Owners</p><div class="metric-value">{{ metrics.owners_count }}</div></div></div></div>
+    <div class="col-sm-6 col-xl-3"><div class="card dashboard-card"><div class="card-body"><p class="metric-label mb-2">Staff</p><div class="metric-value">{{ metrics.staff_count }}</div></div></div></div>
+    <div class="col-sm-6 col-xl-3"><div class="card dashboard-card"><div class="card-body"><p class="metric-label mb-2">{{ t('dashboard.failed_logins_24h') }}</p><div class="metric-value">{{ metrics.failed_logins_24h }}</div></div></div></div>
+  </div>
+
+  <div class="row g-4 mt-1">
+    <div class="col-xl-4">
+      <div class="card chart-card page-section-card">
+        <div class="card-body">
+          <h2 class="h5 mb-3">Business Status Breakdown</h2>
+          <canvas id="opsStatusChart"></canvas>
+        </div>
+      </div>
+    </div>
+    <div class="col-xl-8">
+      <div class="card page-section-card">
+        <div class="card-body">
+          <div class="section-header mb-3">
+            <div>
+              <h2 class="h5 mb-1">{{ t('common.recent_activity') }}</h2>
+              <p>Most recent platform actions and audit events.</p>
+            </div>
+            <a href="{{ url_for('ops.activity_logs') }}" class="btn btn-sm btn-outline-secondary">{{ t('common.view') }}</a>
+          </div>
+          <div class="table-responsive">
+            <table class="table align-middle">
+              <thead><tr><th>{{ t('common.date') }}</th><th>Action</th><th>{{ t('common.business') }}</th></tr></thead>
+              <tbody>
+                {% for log in dashboard_data.recent_logs %}
+                  <tr>
+                    <td>{{ log.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                    <td>{{ log.description }}</td>
+                    <td>{{ log.business.business_name if log.business else 'Platform' }}</td>
+                  </tr>
+                {% else %}
+                  <tr><td colspan="3" class="empty-state">{{ t('common.no_data') }}</td></tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card page-section-card mt-4">
+    <div class="card-body">
+      <div class="section-header mb-3">
+        <div>
+          <h2 class="h5 mb-1">Recent Suspicious Login Attempts</h2>
+          <p>Latest failed login attempts for fast operational review.</p>
+        </div>
+        <a href="{{ url_for('ops.login_attempts') }}" class="btn btn-sm btn-outline-secondary">{{ t('common.view') }}</a>
+      </div>
+      <div class="table-responsive">
+        <table class="table align-middle">
+          <thead><tr><th>{{ t('common.date') }}</th><th>Identifier</th><th>{{ t('common.status') }}</th><th>{{ t('common.business') }}</th></tr></thead>
+          <tbody>
+            {% for attempt in dashboard_data.recent_login_failures %}
+              <tr>
+                <td>{{ attempt.attempted_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                <td>{{ attempt.attempted_identifier }}</td>
+                <td><span class="app-status-badge status-suspended">Failed</span></td>
+                <td>{{ attempt.business.business_name if attempt.business else 'Platform' }}</td>
+              </tr>
+            {% else %}
+              <tr><td colspan="4" class="empty-state">{{ t('common.no_data') }}</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+{% endblock %}
+
+{% block extra_scripts %}
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+  <script>
+    const opsStatusData = {{ dashboard_data.charts.business_statuses|tojson }};
+    new Chart(document.getElementById("opsStatusChart"), {
+      type: "doughnut",
+      data: opsStatusData,
+      options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: "bottom" } } }
+    });
+  </script>
+{% endblock %}

@@ -1,0 +1,37 @@
+{% extends 'components/base.html' %}
+
+{% block title %}{{ t('nav.payments') }}{% endblock %}
+
+{% block content %}
+  <div class="section-header">
+    <div>
+      <p class="metric-label mb-2">{{ t('nav.business_admin') }}</p>
+      <h1 class="h2 mb-1">{{ t('nav.payments') }}</h1>
+      <p>Review submitted subscription payments and approve or reject renewal requests.</p>
+    </div>
+  </div>
+
+  <div class="card page-section-card">
+    <div class="card-body">
+      <div class="table-responsive">
+        <table class="table align-middle">
+          <thead><tr><th>{{ t('common.business') }}</th><th>{{ t('common.payment_method') }}</th><th>{{ t('common.amount_paid') }}</th><th>{{ t('common.date') }}</th><th>{{ t('common.status') }}</th><th>{{ t('common.actions') }}</th></tr></thead>
+          <tbody>
+            {% for payment in payments %}
+              <tr>
+                <td>{{ payment.business.business_name }}</td>
+                <td>{{ payment.payment_method }}</td>
+                <td>{{ currency(payment.amount_paid) }}</td>
+                <td>{{ payment.submitted_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                <td><span class="app-status-badge status-{{ payment.status }}">{{ t('status.' ~ payment.status) }}</span></td>
+                <td><a href="{{ url_for('biz.payment_detail', payment_id=payment.id) }}" class="btn btn-sm btn-outline-secondary">{{ t('common.view') }}</a></td>
+              </tr>
+            {% else %}
+              <tr><td colspan="6" class="empty-state">{{ t('common.no_data') }}</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+{% endblock %}

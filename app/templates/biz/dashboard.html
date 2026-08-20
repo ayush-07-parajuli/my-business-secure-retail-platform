@@ -1,0 +1,147 @@
+{% extends 'components/base.html' %}
+
+{% block title %}{{ t('nav.business_admin') }}{% endblock %}
+
+{% block content %}
+  {% set metrics = dashboard_data.metrics %}
+  <div class="section-header">
+    <div>
+      <p class="metric-label mb-2">{{ t('nav.business_admin') }}</p>
+      <h1 class="h2 mb-1">{{ t('dashboard.welcome') }}, {{ current_user.full_name }}</h1>
+      <p>Track subscription approvals, collections, dues, and company-side SaaS revenue for My Business.</p>
+    </div>
+    <div class="d-flex flex-wrap gap-2">
+      <a class="btn btn-outline-secondary" href="{{ url_for('biz.dashboard', period='month') }}">{{ t('dashboard.this_month') }}</a>
+      <a class="btn btn-outline-secondary" href="{{ url_for('biz.dashboard', period='year') }}">{{ t('dashboard.this_year') }}</a>
+      <a class="btn btn-outline-secondary" href="{{ url_for('biz.dashboard', period='all') }}">{{ t('dashboard.all_time') }}</a>
+      <a class="btn btn-primary" href="{{ url_for('biz.payments') }}">{{ t('nav.payments') }}</a>
+    </div>
+  </div>
+
+  <div class="row g-4">
+    <div class="col-sm-6 col-xxl-3"><div class="card dashboard-card"><div class="card-body"><p class="metric-label mb-2">{{ t('dashboard.total_businesses') }}</p><div class="metric-value">{{ metrics.total_businesses }}</div></div></div></div>
+    <div class="col-sm-6 col-xxl-3"><div class="card dashboard-card"><div class="card-body"><p class="metric-label mb-2">{{ t('dashboard.active_subscriptions') }}</p><div class="metric-value">{{ metrics.active_subscriptions }}</div></div></div></div>
+    <div class="col-sm-6 col-xxl-3"><div class="card dashboard-card"><div class="card-body"><p class="metric-label mb-2">{{ t('dashboard.pending_approvals') }}</p><div class="metric-value">{{ metrics.pending_approvals }}</div></div></div></div>
+    <div class="col-sm-6 col-xxl-3"><div class="card dashboard-card"><div class="card-body"><p class="metric-label mb-2">{{ t('dashboard.expired_subscriptions') }}</p><div class="metric-value">{{ metrics.expired_subscriptions }}</div></div></div></div>
+    <div class="col-sm-6 col-xxl-3"><div class="card dashboard-card"><div class="card-body"><p class="metric-label mb-2">{{ t('dashboard.monthly_subscription_revenue') }}</p><div class="metric-value">{{ currency(metrics.monthly_subscription_revenue) }}</div></div></div></div>
+    <div class="col-sm-6 col-xxl-3"><div class="card dashboard-card"><div class="card-body"><p class="metric-label mb-2">{{ t('dashboard.yearly_subscription_revenue') }}</p><div class="metric-value">{{ currency(metrics.yearly_subscription_revenue) }}</div></div></div></div>
+    <div class="col-sm-6 col-xxl-3"><div class="card dashboard-card"><div class="card-body"><p class="metric-label mb-2">{{ t('dashboard.total_collected_subscription_payments') }}</p><div class="metric-value">{{ currency(metrics.total_collected_subscription_payments) }}</div></div></div></div>
+    <div class="col-sm-6 col-xxl-3"><div class="card dashboard-card"><div class="card-body"><p class="metric-label mb-2">{{ t('dashboard.total_outstanding_subscription_dues') }}</p><div class="metric-value">{{ currency(metrics.total_outstanding_subscription_dues) }}</div></div></div></div>
+    <div class="col-sm-6 col-xxl-3"><div class="card dashboard-card"><div class="card-body"><p class="metric-label mb-2">{{ t('dashboard.estimated_platform_profit') }}</p><div class="metric-value">{{ currency(metrics.estimated_platform_profit) }}</div></div></div></div>
+  </div>
+
+  <div class="row g-4 mt-1">
+    <div class="col-xl-8">
+      <div class="card chart-card page-section-card">
+        <div class="card-body">
+          <h2 class="h5 mb-3">{{ t('dashboard.subscription_revenue_trend') }}</h2>
+          <canvas id="bizRevenueTrendChart"></canvas>
+        </div>
+      </div>
+    </div>
+    <div class="col-xl-4">
+      <div class="card chart-card page-section-card">
+        <div class="card-body">
+          <h2 class="h5 mb-3">{{ t('dashboard.subscription_status_mix') }}</h2>
+          <canvas id="bizStatusChart"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row g-4 mt-1">
+    <div class="col-xl-6">
+      <div class="card chart-card page-section-card">
+        <div class="card-body">
+          <h2 class="h5 mb-3">{{ t('dashboard.renewal_submission_trend') }}</h2>
+          <canvas id="bizRenewalTrendChart"></canvas>
+        </div>
+      </div>
+    </div>
+    <div class="col-xl-6">
+      <div class="card chart-card page-section-card">
+        <div class="card-body">
+          <h2 class="h5 mb-3">{{ t('dashboard.monthly_collections') }}</h2>
+          <canvas id="bizMonthlyCollectionsChart"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row g-4 mt-1">
+    <div class="col-xl-6">
+      <div class="card page-section-card">
+        <div class="card-body">
+          <div class="section-header mb-3">
+            <div>
+              <h2 class="h5 mb-1">{{ t('dashboard.pending_approvals') }}</h2>
+              <p>Latest owner-submitted renewal proofs waiting for review.</p>
+            </div>
+            <a href="{{ url_for('biz.payments', status='pending') }}" class="btn btn-sm btn-outline-secondary">{{ t('common.view') }}</a>
+          </div>
+          <div class="table-responsive">
+            <table class="table align-middle">
+              <thead><tr><th>{{ t('common.business') }}</th><th>{{ t('common.amount_paid') }}</th><th>{{ t('common.status') }}</th></tr></thead>
+              <tbody>
+                {% for payment in dashboard_data.pending_payments %}
+                  <tr>
+                    <td><a href="{{ url_for('biz.payment_detail', payment_id=payment.id) }}" class="text-decoration-none">{{ payment.business.business_name }}</a></td>
+                    <td>{{ currency(payment.amount_paid) }}</td>
+                    <td><span class="app-status-badge status-{{ payment.status }}">{{ t('status.' ~ payment.status) }}</span></td>
+                  </tr>
+                {% else %}
+                  <tr><td colspan="3" class="empty-state">{{ t('common.no_data') }}</td></tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-xl-6">
+      <div class="card page-section-card">
+        <div class="card-body">
+          <div class="section-header mb-3">
+            <div>
+              <h2 class="h5 mb-1">{{ t('dashboard.total_collected_subscription_payments') }}</h2>
+              <p>Latest subscription collections across the platform.</p>
+            </div>
+            <a href="{{ url_for('biz.revenue') }}" class="btn btn-sm btn-outline-secondary">{{ t('common.view') }}</a>
+          </div>
+          <div class="table-responsive">
+            <table class="table align-middle">
+              <thead><tr><th>{{ t('common.business') }}</th><th>{{ t('common.date') }}</th><th>{{ t('common.amount_paid') }}</th></tr></thead>
+              <tbody>
+                {% for payment in dashboard_data.recent_payments %}
+                  <tr>
+                    <td>{{ payment.business.business_name }}</td>
+                    <td>{{ (payment.approved_at or payment.submitted_at).strftime('%Y-%m-%d') }}</td>
+                    <td>{{ currency(payment.amount_paid) }}</td>
+                  </tr>
+                {% else %}
+                  <tr><td colspan="3" class="empty-state">{{ t('common.no_data') }}</td></tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}
+
+{% block extra_scripts %}
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+  <script>
+    const bizRevenueData = {{ dashboard_data.charts.subscription_revenue_trend|tojson }};
+    const bizRenewalData = {{ dashboard_data.charts.renewal_trend|tojson }};
+    const bizStatusData = {{ dashboard_data.charts.status_breakdown|tojson }};
+    const bizCollectionsData = {{ dashboard_data.charts.monthly_collections|tojson }};
+
+    const lineOptions = { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: "bottom" } }, scales: { y: { beginAtZero: true } } };
+    new Chart(document.getElementById("bizRevenueTrendChart"), { type: "line", data: bizRevenueData, options: lineOptions });
+    new Chart(document.getElementById("bizRenewalTrendChart"), { type: "line", data: bizRenewalData, options: lineOptions });
+    new Chart(document.getElementById("bizStatusChart"), { type: "doughnut", data: bizStatusData, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: "bottom" } } } });
+    new Chart(document.getElementById("bizMonthlyCollectionsChart"), { type: "bar", data: bizCollectionsData, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } } });
+  </script>
+{% endblock %}

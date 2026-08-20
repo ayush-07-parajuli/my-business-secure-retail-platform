@@ -1,0 +1,66 @@
+{% extends 'components/base.html' %}
+
+{% block title %}{{ t('nav.users') }}{% endblock %}
+
+{% block content %}
+  <div class="section-header">
+    <div>
+      <p class="metric-label mb-2">{{ t('nav.operational_admin') }}</p>
+      <h1 class="h2 mb-1">{{ t('nav.users') }}</h1>
+      <p>Review company and tenant users across the platform.</p>
+    </div>
+  </div>
+
+  <form class="card page-section-card mb-4">
+    <div class="card-body">
+      <div class="row g-3 align-items-end">
+        <div class="col-lg-4"><label class="form-label">{{ t('common.search') }}</label><input class="form-control" type="text" name="q" value="{{ search }}" placeholder="Search users"></div>
+        <div class="col-lg-3">
+          <label class="form-label">{{ t('common.role') }}</label>
+          <select class="form-select" name="role">
+            <option value="all" {% if role == 'all' %}selected{% endif %}>{{ t('common.all_roles') }}</option>
+            {% for role_value in ['super_admin', 'ops_admin', 'biz_admin', 'owner', 'staff'] %}
+              <option value="{{ role_value }}" {% if role == role_value %}selected{% endif %}>{{ role_value }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="col-lg-3">
+          <label class="form-label">{{ t('common.business') }}</label>
+          <select class="form-select" name="business_id">
+            <option value="all" {% if business_id == 'all' %}selected{% endif %}>{{ t('common.all_businesses') }}</option>
+            {% for business in businesses %}
+              <option value="{{ business.id }}" {% if business_id == business.id %}selected{% endif %}>{{ business.business_name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="col-lg-2 d-flex gap-2">
+          <button class="btn btn-primary w-100" type="submit">{{ t('common.apply') }}</button>
+          <a class="btn btn-outline-secondary" href="{{ url_for('ops.users') }}">{{ t('common.reset') }}</a>
+        </div>
+      </div>
+    </div>
+  </form>
+
+  <div class="card page-section-card">
+    <div class="card-body">
+      <div class="table-responsive">
+        <table class="table align-middle">
+          <thead><tr><th>Name</th><th>Email</th><th>{{ t('common.role') }}</th><th>{{ t('common.business') }}</th><th>{{ t('common.status') }}</th></tr></thead>
+          <tbody>
+            {% for user in users %}
+              <tr>
+                <td>{{ user.full_name }}</td>
+                <td>{{ user.email }}</td>
+                <td>{{ user.role }}</td>
+                <td>{{ user.business.business_name if user.business else 'Company' }}</td>
+                <td><span class="app-status-badge status-{{ user.status }}">{{ t('status.' ~ user.status) }}</span></td>
+              </tr>
+            {% else %}
+              <tr><td colspan="5" class="empty-state">{{ t('common.no_data') }}</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+{% endblock %}

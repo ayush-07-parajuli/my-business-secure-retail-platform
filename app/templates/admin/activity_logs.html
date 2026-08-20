@@ -1,0 +1,61 @@
+{% extends 'components/base.html' %}
+
+{% block title %}{{ t('admin.activity_title') }}{% endblock %}
+
+{% block content %}
+  <div class="section-header">
+    <div>
+      <p class="metric-label mb-2">{{ t('nav.activity_logs') }}</p>
+      <h1 class="h2 mb-1">{{ t('admin.activity_title') }}</h1>
+      <p>Track major platform and tenant actions from the audit trail.</p>
+    </div>
+  </div>
+
+  <div class="card page-section-card">
+    <div class="card-body">
+      <form class="filter-toolbar row g-3 align-items-end mb-4">
+        <div class="col-md-4">
+          <label class="form-label">{{ t('common.business') }}</label>
+          <select class="form-select" name="business_id">
+            <option value="all" {% if business_id == 'all' %}selected{% endif %}>{{ t('common.all_businesses') }}</option>
+            {% for business in businesses %}
+              <option value="{{ business.id }}" {% if business_id == business.id %}selected{% endif %}>{{ business.business_name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="col-md-4">
+          <label class="form-label">Severity</label>
+          <select class="form-select" name="severity">
+            <option value="all" {% if severity == 'all' %}selected{% endif %}>All severities</option>
+            <option value="info" {% if severity == 'info' %}selected{% endif %}>Info</option>
+            <option value="warning" {% if severity == 'warning' %}selected{% endif %}>Warning</option>
+            <option value="critical" {% if severity == 'critical' %}selected{% endif %}>Critical</option>
+          </select>
+        </div>
+        <div class="col-md-4 d-flex gap-2">
+          <button class="btn btn-primary flex-fill" type="submit">{{ t('common.apply') }}</button>
+          <a class="btn btn-outline-secondary" href="{{ url_for('admin.activity_logs') }}">{{ t('common.reset') }}</a>
+        </div>
+      </form>
+
+      <div class="table-responsive">
+        <table class="table align-middle">
+          <thead><tr><th>{{ t('common.date') }}</th><th>Action</th><th>{{ t('common.business') }}</th><th>User</th><th>Severity</th></tr></thead>
+          <tbody>
+            {% for log in logs %}
+              <tr>
+                <td>{{ log.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                <td>{{ log.description }}</td>
+                <td>{{ log.business.business_name if log.business else 'Platform' }}</td>
+                <td>{{ log.user.full_name if log.user else 'System' }}</td>
+                <td>{{ log.severity|capitalize }}</td>
+              </tr>
+            {% else %}
+              <tr><td colspan="5" class="empty-state">{{ t('common.no_data') }}</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+{% endblock %}

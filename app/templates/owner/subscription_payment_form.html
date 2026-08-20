@@ -1,0 +1,72 @@
+{% extends 'components/base.html' %}
+
+{% block title %}{{ t('nav.subscription') }}{% endblock %}
+
+{% block content %}
+  <div class="row justify-content-center">
+    <div class="col-xl-8">
+      <div class="card page-section-card">
+        <div class="card-body p-4 p-lg-5">
+          <div class="section-header mb-4">
+            <div>
+              <p class="metric-label mb-2">{{ t('nav.subscription') }}</p>
+              <h1 class="h3 mb-1">Submit Renewal Payment</h1>
+              <p class="text-body-secondary mb-0">{{ business.business_name }} • {{ subscription_summary.plan_name }}</p>
+            </div>
+            <a href="{{ url_for('owner.subscription') }}" class="btn btn-outline-secondary">{{ t('common.back') }}</a>
+          </div>
+
+          <div class="row g-4 mb-4">
+            <div class="col-md-4"><div class="insight-card h-100"><strong>{{ currency(subscription_summary.monthly_fee, business) }}</strong><span>{{ t('common.monthly_fee') }}</span></div></div>
+            <div class="col-md-4"><div class="insight-card h-100"><strong>{{ t('status.' ~ subscription_summary.status) }}</strong><span>{{ t('common.status') }}</span></div></div>
+            <div class="col-md-4"><div class="insight-card h-100"><strong>{{ currency(subscription_summary.amount_due, business) }}</strong><span>{{ t('common.amount_due') }}</span></div></div>
+          </div>
+
+          <form method="post" novalidate>
+            {{ form.hidden_tag() }}
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label class="form-label" for="{{ form.amount_paid.id }}">{{ form.amount_paid.label.text }}</label>
+                {{ form.amount_paid(class="form-control") }}
+                {% for error in form.amount_paid.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+              </div>
+              <div class="col-md-6">
+                <label class="form-label" for="{{ form.payment_method.id }}">{{ form.payment_method.label.text }}</label>
+                {{ form.payment_method(class="form-select") }}
+                {% for error in form.payment_method.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+              </div>
+              <div class="col-md-6">
+                <label class="form-label" for="{{ form.transaction_id.id }}">{{ form.transaction_id.label.text }}</label>
+                {{ form.transaction_id(class="form-control", placeholder="Optional transaction or voucher ID") }}
+                {% for error in form.transaction_id.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+              </div>
+              <div class="col-md-6">
+                <label class="form-label" for="{{ form.payment_date.id }}">{{ form.payment_date.label.text }}</label>
+                {{ form.payment_date(class="form-control") }}
+                {% for error in form.payment_date.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+              </div>
+              <div class="col-md-6">
+                <label class="form-label" for="{{ form.months_covered.id }}">{{ form.months_covered.label.text }}</label>
+                {{ form.months_covered(class="form-control") }}
+                {% for error in form.months_covered.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+              </div>
+              <div class="col-md-6">
+                <label class="form-label" for="{{ form.proof_path.id }}">{{ form.proof_path.label.text }}</label>
+                {{ form.proof_path(class="form-control", placeholder="Screenshot path or proof reference") }}
+                {% for error in form.proof_path.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+              </div>
+              <div class="col-12">
+                <label class="form-label" for="{{ form.note.id }}">{{ form.note.label.text }}</label>
+                {{ form.note(class="form-control", rows="4", placeholder="Add any note for manual verification") }}
+                {% for error in form.note.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+              </div>
+            </div>
+            <div class="mt-4 d-flex justify-content-end">
+              {{ form.submit(class="btn btn-primary") }}
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}
